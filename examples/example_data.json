@@ -1,0 +1,137 @@
+{
+    "nodes": [{
+      "id": 1,
+      "label": "Joseph Gordon-Levitt",
+      "properties": {
+        "name": "Joseph Gordon-Levitt",
+        "description": "This is Joseph Gordon-Levitt",
+        "type": "Actor"
+      }
+    }, {
+      "id": 2,
+      "label": "Leonardo DiCaprio",
+      "properties": {
+        "name": "Leonardo DiCaprio",
+        "description": "This is Leonardo DiCaprio",
+        "type": "Actor"
+      }
+    }, {
+      "id": 3,
+      "label": "Christopher Nolan",
+      "properties": {
+        "name": "Christopher Nolan",
+        "description": "This is Christopher Nolan",
+        "type": "Director"
+      }
+    }, {
+      "id": 4,
+      "label": "Inception",
+      "properties": {
+        "title": "Inception",
+        "description": "This is Inception",
+        "type": "Film"
+      }
+    }, {
+      "id": 5,
+      "label": "From Dusk Till Dawn",
+      "properties": {
+        "title": "From Dusk Till Dawn",
+        "description": "This is From Dusk Till Dawn",
+        "type": "Film"
+      }
+    }, {
+      "id": 6,
+      "label": "Quentin Tarantino",
+      "properties": {
+        "title": "Quentin Tarantino",
+        "description": "This is Quentin Tarantino",
+        "type": "Director"
+      }
+    }, {
+      "id": 7,
+      "label": "Danny Trejo",
+      "properties": {
+        "title": "Danny Trejo",
+        "description": "This is Danny Trejo",
+        "type": "Actor"
+      }
+    }, {
+      "id": 8,
+      "label": "Selma Hayek",
+      "properties": {
+        "title": "Selma Hayek",
+        "description": "This is Selma Hayek",
+        "type": "Actor"
+      }
+    }, {
+      "id": 9,
+      "label": "Titanic",
+      "properties": {
+        "title": "Titanic",
+        "description": "This is Titanic",
+        "type": "Film"
+      }
+    }],
+    "edges": [{
+      "source_node_id": 1,
+      "target_node_id": 4,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Arthur"
+      }
+    }, {
+      "source_node_id": 2,
+      "target_node_id": 4,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Cobb"
+      }
+    }, {
+      "source_node_id": 4,
+      "target_node_id": 3,
+      "relationship_name": "DIRECTED_BY",
+      "properties": {
+        "year": "2010"
+      }
+    }, {
+      "source_node_id": 6,
+      "target_node_id": 5,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Richard Gecko"
+      }
+    }, {
+      "source_node_id": 7,
+      "target_node_id": 5,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Razor Charlie"
+      }
+    }, {
+      "source_node_id": 8,
+      "target_node_id": 5,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Santanico Pandemonium"
+      }
+    }, {
+      "source_node_id": 5,
+      "target_node_id": 6,
+      "relationship_name": "DIRECTED_BY",
+      "properties": {
+        "year": "1996"
+      }
+    }, {
+      "source_node_id": 2,
+      "target_node_id": 9,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Jack"
+      }
+    }],
+    "colors": {
+      "Actor": "#ff0000",
+      "Director": "#00ff00",
+      "Film": "#0000ff"
+    }
+  }

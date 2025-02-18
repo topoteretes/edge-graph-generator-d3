@@ -1,0 +1,22 @@
+{
+  "name": "d3-edge-graph",
+  "version": "1.0.0",
+  "description": "Interactive D3.js edge graph visualization generator",
+  "main": "src/generateEdgeGraph.js",
+  "scripts": {
+    "generate": "node src/generateEdgeGraph.js",
+    "example": "node src/generateEdgeGraph.js examples/example_data.json"
+  },
+  "keywords": [
+    "d3",
+    "visualization",
+    "edge-graph",
+    "canvas",
+    "force-directed"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^7.0.0"
+  }
+} 

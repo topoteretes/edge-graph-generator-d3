@@ -183,20 +183,21 @@ class EdgeGraph {
                     textAngle = textAngle - Math.PI;
                 }
 
+                // Draw relationship text
                 this.ctx.save();
                 this.ctx.translate(midX, midY);
                 this.ctx.rotate(textAngle);
 
-                // Draw relationship name closer to the line
-                this.ctx.font = '12px Arial';
+                // Consistent text styling
+                this.ctx.font = '14px Arial';
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'bottom';
-                this.ctx.fillText(link.relationship, 0, -8);  // Changed from -12 to -8 to be closer to line
+                this.ctx.fillText(link.relationship, 0, -6);  // Changed from -10 to -6
 
                 this.ctx.restore();
 
-                // If bidirectional, draw the reverse arrow and text
+                // If bidirectional, draw the reverse relationship text
                 if (bidirectionalPair) {
                     // Draw reverse arrow at opposite offset
                     const reverseStartX = sourceNode.x + unitX * nodeRadius - offsetX;
@@ -224,14 +225,15 @@ class EdgeGraph {
                     this.ctx.closePath();
                     this.ctx.fill();
 
-                    // Draw reverse relationship text
+                    // Draw reverse relationship text with same styling
                     this.ctx.save();
                     this.ctx.translate((reverseStartX + reverseEndX) / 2, (reverseStartY + reverseEndY) / 2);
                     this.ctx.rotate(textAngle);
+                    this.ctx.font = '14px Arial';
                     this.ctx.fillStyle = '#ffffff';
                     this.ctx.textAlign = 'center';
                     this.ctx.textBaseline = 'bottom';
-                    this.ctx.fillText(bidirectionalPair.relationship, 0, -8);  // Changed from -12 to -8
+                    this.ctx.fillText(bidirectionalPair.relationship, 0, -6);  // Changed from -10 to -6
                     this.ctx.restore();
                 }
             }

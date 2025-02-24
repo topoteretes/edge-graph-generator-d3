@@ -8,6 +8,8 @@ class EdgeGraph {
         this.nodes = [];
         this.links = [];
         this.transform = d3.zoomIdentity;
+        this.minZoom = 0.1;
+        this.maxZoom = 4;
         this.dragging = false;
         this.selectedNode = null;
         this.clusterThreshold = 3;
@@ -23,16 +25,34 @@ class EdgeGraph {
         // Process data
         this.processData(this.data);
 
+        // Calculate initial positions before simulation
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const radius = Math.min(this.canvas.width, this.canvas.height) / 4;
+        
+        // Position nodes in a circle initially
+        this.nodes.forEach((node, i) => {
+            const angle = (i / this.nodes.length) * 2 * Math.PI;
+            node.x = centerX + radius * Math.cos(angle);
+            node.y = centerY + radius * Math.sin(angle);
+        });
+
+        // Setup zoom behavior first
+        this.setupZoom();
+        
+        // Fit view to content immediately with initial positions
+        this.fitViewToContent();
+
         // Setup force simulation with adjusted parameters
         this.simulation = d3.forceSimulation(this.nodes)
             .force('link', d3.forceLink(this.links)
                 .id(d => d.id)
-                .distance(250))  // Increased from 200 to 250
+                .distance(250))
             .force('charge', d3.forceManyBody()
-                .strength(-600)  // Increased repulsion
+                .strength(-600)
                 .distanceMax(350))
             .force('collide', d3.forceCollide()
-                .radius(65)     // Slightly larger than node radius
+                .radius(65)
                 .strength(0.7))
             .force('center', d3.forceCenter(
                 this.canvas.width / 2,
@@ -51,6 +71,9 @@ class EdgeGraph {
         const rect = this.container.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
+        
+        // Redraw after resize
+        this.draw();
     }
 
     processData(data) {
@@ -75,10 +98,11 @@ class EdgeGraph {
 
     draw() {
         // Clear and set background
-        this.ctx.fillStyle = '#1a1a1a';  // Dark background
+        this.ctx.fillStyle = '#1a1a1a';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
+        // Apply zoom transform
         this.ctx.translate(this.transform.x, this.transform.y);
         this.ctx.scale(this.transform.k, this.transform.k);
 
@@ -425,5 +449,71 @@ class EdgeGraph {
         }
         lines.push(currentLine);
         return lines;
+    }
+
+    setupZoom() {
+        const zoom = d3.zoom()
+            .scaleExtent([this.minZoom, this.maxZoom])
+            .on('zoom', (event) => {
+                this.transform = event.transform;
+                this.draw();
+            });
+
+        d3.select(this.canvas)
+            .call(zoom)
+            .call(zoom.transform, d3.zoomIdentity);
+    }
+
+    fitViewToContent() {
+        // Calculate bounds
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+        
+        this.nodes.forEach(node => {
+            if (node.x == null || node.y == null) return;
+            const radius = 60; // Node radius
+            minX = Math.min(minX, node.x - radius);
+            maxX = Math.max(maxX, node.x + radius);
+            minY = Math.min(minY, node.y - radius);
+            maxY = Math.max(maxY, node.y + radius);
+        });
+
+        // Add consistent padding
+        const edgePadding = 40;  // Increased from 20 to 40
+        const viewPadding = 60;  // Increased from 40 to 60
+        
+        // Adjust bounds with padding
+        minX -= edgePadding;
+        maxX += edgePadding;
+        minY -= edgePadding;
+        maxY += edgePadding;
+
+        // Calculate dimensions
+        const width = this.canvas.width - (viewPadding * 2);
+        const height = this.canvas.height - (viewPadding * 2);
+        const graphWidth = maxX - minX;
+        const graphHeight = maxY - minY;
+        
+        // Calculate scale to fit content with additional scaling factor
+        const scale = Math.min(
+            width / graphWidth,
+            height / graphHeight,
+            0.8  // Reduced from 0.9 to 0.8 to zoom out more
+        );
+
+        // Calculate translation to center and account for padding
+        const tx = viewPadding + (-minX * scale) + (width - graphWidth * scale) / 2;
+        const ty = viewPadding + (-minY * scale) + (height - graphHeight * scale) / 2;
+
+        // Apply transform
+        const transform = d3.zoomIdentity
+            .translate(tx, ty)
+            .scale(scale);
+
+        d3.select(this.canvas)
+            .call(d3.zoom().transform, transform);
+
+        this.transform = transform;
+        this.draw();
     }
 }

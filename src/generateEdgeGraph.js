@@ -36,6 +36,9 @@ const htmlTemplate = `<!DOCTYPE html>
             top: 0;
             left: 0;
         }
+        body {
+            margin: 0;
+        }
     </style>
 </head>
 <body>

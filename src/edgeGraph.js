@@ -275,10 +275,10 @@ class EdgeGraph {
 
     setupDrag() {
         let draggedNode = null;
-        let dragStartTransform = null;
 
         const dragSubject = (event) => {
             const point = d3.pointer(event, this.canvas);
+            // Transform mouse coordinates to simulation space
             const x = (point[0] - this.transform.x) / this.transform.k;
             const y = (point[1] - this.transform.y) / this.transform.k;
 
@@ -301,30 +301,25 @@ class EdgeGraph {
                 
                 draggedNode = event.subject;
                 this.dragging = true;
-                
-                // Store initial transform
-                dragStartTransform = {
-                    x: this.transform.x,
-                    y: this.transform.y,
-                    k: this.transform.k
-                };
 
-                // Fix node at current position
+                // Stop simulation and fix node
+                this.simulation.stop();
                 draggedNode.fx = draggedNode.x;
                 draggedNode.fy = draggedNode.y;
             })
             .on('drag', (event) => {
-                if (!draggedNode || !dragStartTransform) return;
+                if (!draggedNode) return;
 
-                // Calculate position change in screen coordinates
-                const dx = (event.x - event.subject.x * dragStartTransform.k - dragStartTransform.x) / dragStartTransform.k;
-                const dy = (event.y - event.subject.y * dragStartTransform.k - dragStartTransform.y) / dragStartTransform.k;
+                // Transform cursor position to simulation space
+                const point = d3.pointer(event, this.canvas);
+                const x = (point[0] - this.transform.x) / this.transform.k;
+                const y = (point[1] - this.transform.y) / this.transform.k;
 
-                // Update node position
-                draggedNode.x = event.subject.x + dx;
-                draggedNode.y = event.subject.y + dy;
-                draggedNode.fx = draggedNode.x;
-                draggedNode.fy = draggedNode.y;
+                // Update node position directly to cursor
+                draggedNode.x = x;
+                draggedNode.y = y;
+                draggedNode.fx = x;
+                draggedNode.fy = y;
 
                 this.draw();
             })
@@ -336,9 +331,8 @@ class EdgeGraph {
                 // Release node
                 draggedNode.fx = null;
                 draggedNode.fy = null;
-
+                
                 draggedNode = null;
-                dragStartTransform = null;
 
                 // Restart simulation gently
                 this.simulation.alpha(0.1).restart();

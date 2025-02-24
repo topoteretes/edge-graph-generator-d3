@@ -275,7 +275,7 @@ class EdgeGraph {
 
     setupDrag() {
         let draggedNode = null;
-        let dragOffset = { x: 0, y: 0 };
+        let dragStartTransform = null;
 
         const dragSubject = (event) => {
             const point = d3.pointer(event, this.canvas);
@@ -286,12 +286,7 @@ class EdgeGraph {
                 if (n.x == null || n.y == null) return false;
                 const dx = x - n.x;
                 const dy = y - n.y;
-                if (dx * dx + dy * dy < (60 * 60)) {
-                    dragOffset.x = dx;
-                    dragOffset.y = dy;
-                    return true;
-                }
-                return false;
+                return dx * dx + dy * dy < (60 * 60);
             });
 
             return node;
@@ -299,49 +294,54 @@ class EdgeGraph {
 
         const drag = d3.drag()
             .container(this.canvas)
-            .filter(event => {
-                return !event.button && !event.ctrlKey;
-            })
+            .filter(event => !event.button && !event.ctrlKey)
             .subject(dragSubject)
             .on('start', (event) => {
                 if (!event.subject) return;
                 
-                this.dragging = true;
                 draggedNode = event.subject;
+                this.dragging = true;
                 
-                // Keep simulation running but fix dragged node
+                // Store initial transform
+                dragStartTransform = {
+                    x: this.transform.x,
+                    y: this.transform.y,
+                    k: this.transform.k
+                };
+
+                // Fix node at current position
                 draggedNode.fx = draggedNode.x;
                 draggedNode.fy = draggedNode.y;
-                
-                // Ensure simulation is active
-                this.simulation.alphaTarget(0.3).restart();
             })
             .on('drag', (event) => {
-                if (!draggedNode) return;
-                
-                // Update dragged node position directly from mouse
-                const x = (event.x - this.transform.x) / this.transform.k;
-                const y = (event.y - this.transform.y) / this.transform.k;
-                draggedNode.fx = x - dragOffset.x;
-                draggedNode.fy = y - dragOffset.y;
-                
-                // Let simulation continue for other nodes
-                this.simulation.alpha(0.3);
+                if (!draggedNode || !dragStartTransform) return;
+
+                // Calculate position change in screen coordinates
+                const dx = (event.x - event.subject.x * dragStartTransform.k - dragStartTransform.x) / dragStartTransform.k;
+                const dy = (event.y - event.subject.y * dragStartTransform.k - dragStartTransform.y) / dragStartTransform.k;
+
+                // Update node position
+                draggedNode.x = event.subject.x + dx;
+                draggedNode.y = event.subject.y + dy;
+                draggedNode.fx = draggedNode.x;
+                draggedNode.fy = draggedNode.y;
+
+                this.draw();
             })
             .on('end', (event) => {
                 if (!draggedNode) return;
-
-                this.dragging = false;
                 
-                // Release the dragged node
+                this.dragging = false;
+
+                // Release node
                 draggedNode.fx = null;
                 draggedNode.fy = null;
-                
+
                 draggedNode = null;
-                dragOffset = { x: 0, y: 0 };
-                
-                // Let simulation cool down naturally
-                this.simulation.alphaTarget(0);
+                dragStartTransform = null;
+
+                // Restart simulation gently
+                this.simulation.alpha(0.1).restart();
             });
 
         d3.select(this.canvas).call(drag);
@@ -482,8 +482,8 @@ class EdgeGraph {
         });
 
         // Add consistent padding
-        const edgePadding = 40;  // Increased from 20 to 40
-        const viewPadding = 60;  // Increased from 40 to 60
+        const edgePadding = 40;
+        const viewPadding = 60;
         
         // Adjust bounds with padding
         minX -= edgePadding;

@@ -4,6 +4,22 @@ class EdgeGraph {
         this.data = data;
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
+        
+        // Configuration constants
+        this.config = {
+            nodeRadius: 60,
+            arrowLength: 15,
+            arrowWidth: Math.PI / 12,
+            lineWidth: 1.5,
+            font: '14px Arial',
+            boldFont: 'bold 14px Arial',
+            lineHeight: 16,
+            bidirectionalOffset: 15,
+            textOffset: 6,
+            edgePadding: 40,
+            viewPadding: 60
+        };
+        
         this.simulation = null;
         this.nodes = [];
         this.links = [];
@@ -77,268 +93,324 @@ class EdgeGraph {
     }
 
     processData(data) {
-        // Process nodes
-        this.nodes = data.nodes.map(node => ({
-            id: node.id,
-            label: node.label,
-            properties: node.properties,
-            color: data.colors[node.properties.type] || '#999999',
-            x: undefined,
-            y: undefined
-        }));
+        if (!data || !data.nodes || !data.edges) {
+            console.error('Invalid data format:', data);
+            return;
+        }
+        
+        try {
+            // Process nodes
+            this.nodes = data.nodes.map(node => ({
+                id: node.id,
+                label: node.label,
+                properties: node.properties,
+                color: data.colors[node.properties.type] || '#999999',
+                x: undefined,
+                y: undefined
+            }));
 
-        // Process edges with proper source and target references
-        this.links = data.edges.map(edge => ({
-            source: this.nodes.find(n => n.id === edge.source_node_id),
-            target: this.nodes.find(n => n.id === edge.target_node_id),
-            relationship: edge.relationship_name,
-            properties: edge.properties
-        }));
+            // Process edges with proper source and target references
+            this.links = data.edges.map(edge => ({
+                source: this.nodes.find(n => n.id === edge.source_node_id),
+                target: this.nodes.find(n => n.id === edge.target_node_id),
+                relationship: edge.relationship_name,
+                properties: edge.properties
+            }));
+
+            // Pre-compute bidirectional pairs
+            this.bidirectionalPairs = new Map();
+            
+            for (let i = 0; i < this.links.length; i++) {
+                const link1 = this.links[i];
+                for (let j = i + 1; j < this.links.length; j++) {
+                    const link2 = this.links[j];
+                    if (link1.source.id === link2.target.id && link1.target.id === link2.source.id) {
+                        this.bidirectionalPairs.set(link1, link2);
+                        this.bidirectionalPairs.set(link2, link1);
+                        break;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error processing graph data:', error);
+        }
     }
 
     draw() {
-        // Clear and set background
+        this.clearCanvas();
+        this.ctx.save();
+        this.applyTransform();
+        
+        this.drawLinks();
+        this.drawNodes();
+        
+        this.ctx.restore();
+    }
+
+    clearCanvas() {
         this.ctx.fillStyle = '#1a1a1a';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
 
-        this.ctx.save();
-        // Apply zoom transform
+    applyTransform() {
         this.ctx.translate(this.transform.x, this.transform.y);
         this.ctx.scale(this.transform.k, this.transform.k);
+    }
 
-        // Draw links with arrows and relationship labels
-        this.links.forEach(link => {
-            const sourceNode = link.source;
-            const targetNode = link.target;
+    drawLinks() {
+        this.links.forEach(link => this.drawLink(link));
+    }
+
+    drawLink(link) {
+        const sourceNode = link.source;
+        const targetNode = link.target;
+        
+        if (sourceNode && targetNode && sourceNode.x != null && sourceNode.y != null && 
+            targetNode.x != null && targetNode.y != null) {
             
-            if (sourceNode && targetNode && sourceNode.x != null && sourceNode.y != null && 
-                targetNode.x != null && targetNode.y != null) {
-                
-                const nodeRadius = 60;  // Match the new node size
-                // Calculate direction vector
-                const dx = targetNode.x - sourceNode.x;
-                const dy = targetNode.y - sourceNode.y;
-                const length = Math.sqrt(dx * dx + dy * dy);
-                
-                if (length === 0) return;
+            const nodeRadius = this.config.nodeRadius;  // Match the new node size
+            // Calculate direction vector
+            const dx = targetNode.x - sourceNode.x;
+            const dy = targetNode.y - sourceNode.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            
+            if (length === 0) return;
 
-                // Check if this is part of a bidirectional relationship
-                const bidirectionalPair = this.getBidirectionalPair(link);
-                
-                // Normalize direction vector
-                const unitX = dx / length;
-                const unitY = dy / length;
+            // Check if this is part of a bidirectional relationship
+            const bidirectionalPair = this.getBidirectionalPair(link);
+            
+            // Normalize direction vector
+            const unitX = dx / length;
+            const unitY = dy / length;
 
-                // Offset for bidirectional links
-                let offsetX = 0;
-                let offsetY = 0;
-                if (bidirectionalPair) {
-                    offsetX = -unitY * 15; // Perpendicular offset
-                    offsetY = unitX * 15;
-                    // Only draw if this is the first of the pair
-                    if (link.source.id > link.target.id) return;
-                }
+            // Offset for bidirectional links
+            let offsetX = 0;
+            let offsetY = 0;
+            if (bidirectionalPair) {
+                offsetX = -unitY * this.config.bidirectionalOffset; // Perpendicular offset
+                offsetY = unitX * this.config.bidirectionalOffset;
+                // Only draw if this is the first of the pair
+                if (link.source.id > link.target.id) return;
+            }
 
-                // Calculate start and end points with offset
-                const startX = sourceNode.x + unitX * nodeRadius + offsetX;
-                const startY = sourceNode.y + unitY * nodeRadius + offsetY;
-                const endX = targetNode.x - unitX * nodeRadius + offsetX;
-                const endY = targetNode.y - unitY * nodeRadius + offsetY;
+            // Calculate start and end points with offset
+            const startX = sourceNode.x + unitX * nodeRadius + offsetX;
+            const startY = sourceNode.y + unitY * nodeRadius + offsetY;
+            const endX = targetNode.x - unitX * nodeRadius + offsetX;
+            const endY = targetNode.y - unitY * nodeRadius + offsetY;
 
-                // Draw the line
+            // Draw the line
+            this.ctx.beginPath();
+            this.ctx.moveTo(startX, startY);
+            this.ctx.lineTo(endX, endY);
+            this.ctx.strokeStyle = '#ffffff';
+            this.ctx.lineWidth = this.config.lineWidth;
+            this.ctx.stroke();
+
+            // Draw the arrow head
+            const arrowLength = this.config.arrowLength;  // Increased from 12 to 15
+            const arrowWidth = this.config.arrowWidth;
+            const angle = Math.atan2(dy, dx);
+
+            this.ctx.beginPath();
+            this.ctx.moveTo(endX, endY);
+            this.ctx.lineTo(
+                endX - arrowLength * Math.cos(angle - arrowWidth),
+                endY - arrowLength * Math.sin(angle - arrowWidth)
+            );
+            this.ctx.lineTo(
+                endX - arrowLength * Math.cos(angle + arrowWidth),
+                endY - arrowLength * Math.sin(angle + arrowWidth)
+            );
+            this.ctx.closePath();
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fill();
+
+            // Calculate text position (always above the line)
+            const midX = (startX + endX) / 2;
+            const midY = (startY + endY) / 2;
+
+            // Calculate angle but don't flip text
+            let textAngle = Math.atan2(dy, dx);
+            // Ensure text is always readable from left to right
+            if (textAngle > Math.PI / 2 || textAngle < -Math.PI / 2) {
+                textAngle = textAngle - Math.PI;
+            }
+
+            // Draw relationship text
+            this.ctx.save();
+            this.ctx.translate(midX, midY);
+            this.ctx.rotate(textAngle);
+
+            // Consistent text styling
+            this.ctx.font = this.config.font;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'bottom';
+            this.ctx.fillText(link.relationship, 0, -this.config.textOffset);  // Changed from -10 to -6
+
+            this.ctx.restore();
+
+            // If bidirectional, draw the reverse relationship text
+            if (bidirectionalPair) {
+                // Draw reverse arrow at opposite offset
+                const reverseStartX = sourceNode.x + unitX * nodeRadius - offsetX;
+                const reverseStartY = sourceNode.y + unitY * nodeRadius - offsetY;
+                const reverseEndX = targetNode.x - unitX * nodeRadius - offsetX;
+                const reverseEndY = targetNode.y - unitY * nodeRadius - offsetY;
+
+                // Draw reverse line
                 this.ctx.beginPath();
-                this.ctx.moveTo(startX, startY);
-                this.ctx.lineTo(endX, endY);
-                this.ctx.strokeStyle = '#ffffff';
-                this.ctx.lineWidth = 1.5;
+                this.ctx.moveTo(reverseStartX, reverseStartY);
+                this.ctx.lineTo(reverseEndX, reverseEndY);
                 this.ctx.stroke();
 
-                // Draw the arrow head
-                const arrowLength = 15;  // Increased from 12 to 15
-                const arrowWidth = Math.PI / 12;
-                const angle = Math.atan2(dy, dx);
-
+                // Draw reverse arrow head
                 this.ctx.beginPath();
-                this.ctx.moveTo(endX, endY);
+                this.ctx.moveTo(reverseStartX, reverseStartY);
                 this.ctx.lineTo(
-                    endX - arrowLength * Math.cos(angle - arrowWidth),
-                    endY - arrowLength * Math.sin(angle - arrowWidth)
+                    reverseStartX + arrowLength * Math.cos(angle - arrowWidth),
+                    reverseStartY + arrowLength * Math.sin(angle - arrowWidth)
                 );
                 this.ctx.lineTo(
-                    endX - arrowLength * Math.cos(angle + arrowWidth),
-                    endY - arrowLength * Math.sin(angle + arrowWidth)
+                    reverseStartX + arrowLength * Math.cos(angle + arrowWidth),
+                    reverseStartY + arrowLength * Math.sin(angle + arrowWidth)
                 );
                 this.ctx.closePath();
-                this.ctx.fillStyle = '#ffffff';
                 this.ctx.fill();
 
-                // Calculate text position (always above the line)
-                const midX = (startX + endX) / 2;
-                const midY = (startY + endY) / 2;
-
-                // Calculate angle but don't flip text
-                let textAngle = Math.atan2(dy, dx);
-                // Ensure text is always readable from left to right
-                if (textAngle > Math.PI / 2 || textAngle < -Math.PI / 2) {
-                    textAngle = textAngle - Math.PI;
-                }
-
-                // Draw relationship text
+                // Draw reverse relationship text with same styling
                 this.ctx.save();
-                this.ctx.translate(midX, midY);
+                this.ctx.translate((reverseStartX + reverseEndX) / 2, (reverseStartY + reverseEndY) / 2);
                 this.ctx.rotate(textAngle);
-
-                // Consistent text styling
-                this.ctx.font = '14px Arial';
+                this.ctx.font = this.config.font;
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'bottom';
-                this.ctx.fillText(link.relationship, 0, -6);  // Changed from -10 to -6
-
+                this.ctx.fillText(bidirectionalPair.relationship, 0, -this.config.textOffset);  // Changed from -10 to -6
                 this.ctx.restore();
-
-                // If bidirectional, draw the reverse relationship text
-                if (bidirectionalPair) {
-                    // Draw reverse arrow at opposite offset
-                    const reverseStartX = sourceNode.x + unitX * nodeRadius - offsetX;
-                    const reverseStartY = sourceNode.y + unitY * nodeRadius - offsetY;
-                    const reverseEndX = targetNode.x - unitX * nodeRadius - offsetX;
-                    const reverseEndY = targetNode.y - unitY * nodeRadius - offsetY;
-
-                    // Draw reverse line
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(reverseStartX, reverseStartY);
-                    this.ctx.lineTo(reverseEndX, reverseEndY);
-                    this.ctx.stroke();
-
-                    // Draw reverse arrow head
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(reverseStartX, reverseStartY);
-                    this.ctx.lineTo(
-                        reverseStartX + arrowLength * Math.cos(angle - arrowWidth),
-                        reverseStartY + arrowLength * Math.sin(angle - arrowWidth)
-                    );
-                    this.ctx.lineTo(
-                        reverseStartX + arrowLength * Math.cos(angle + arrowWidth),
-                        reverseStartY + arrowLength * Math.sin(angle + arrowWidth)
-                    );
-                    this.ctx.closePath();
-                    this.ctx.fill();
-
-                    // Draw reverse relationship text with same styling
-                    this.ctx.save();
-                    this.ctx.translate((reverseStartX + reverseEndX) / 2, (reverseStartY + reverseEndY) / 2);
-                    this.ctx.rotate(textAngle);
-                    this.ctx.font = '14px Arial';
-                    this.ctx.fillStyle = '#ffffff';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'bottom';
-                    this.ctx.fillText(bidirectionalPair.relationship, 0, -6);  // Changed from -10 to -6
-                    this.ctx.restore();
-                }
             }
-        });
+        }
+    }
 
-        // Draw nodes last so they appear on top
+    drawNodes() {
         this.nodes.forEach(node => {
             if (node.x == null || node.y == null) return;
-            
-            const nodeRadius = 60;  // Increased node size
-            
-            // Draw node circle without border
-            this.ctx.beginPath();
-            this.ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-            this.ctx.fillStyle = node.color;
-            this.ctx.fill();
-
-            // Draw node label inside the circle
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = 'bold 14px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            
-            // Wrap text to fit inside node
-            const maxWidth = nodeRadius * 1.5;  // Maximum width for text
-            const lines = this.wrapText(node.label, maxWidth);
-            const lineHeight = 16;
-            const totalHeight = lines.length * lineHeight;
-            
-            // Draw each line of text
-            lines.forEach((line, index) => {
-                const y = node.y - (totalHeight / 2) + (index * lineHeight) + (lineHeight / 2);
-                this.ctx.fillText(line, node.x, y);
-            });
+            if (!this.isNodeVisible(node)) return;
+            this.drawNode(node);
         });
+    }
 
-        this.ctx.restore();
+    drawNode(node) {
+        if (node.x == null || node.y == null) return;
+        
+        const nodeRadius = this.config.nodeRadius;  // Increased node size
+        
+        // Draw node circle without border
+        this.ctx.beginPath();
+        this.ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+        this.ctx.fillStyle = node.color;
+        this.ctx.fill();
+
+        // Draw node label inside the circle
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = this.config.boldFont;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Wrap text to fit inside node
+        const maxWidth = nodeRadius * 1.5;  // Maximum width for text
+        const lines = this.wrapText(node.label, maxWidth);
+        const lineHeight = this.config.lineHeight;
+        const totalHeight = lines.length * lineHeight;
+        
+        // Draw each line of text
+        lines.forEach((line, index) => {
+            const y = node.y - (totalHeight / 2) + (index * lineHeight) + (lineHeight / 2);
+            this.ctx.fillText(line, node.x, y);
+        });
     }
 
     setupDrag() {
         let draggedNode = null;
-
+        
         const dragSubject = (event) => {
-            const point = d3.pointer(event, this.canvas);
             // Transform mouse coordinates to simulation space
-            const x = (point[0] - this.transform.x) / this.transform.k;
-            const y = (point[1] - this.transform.y) / this.transform.k;
-
-            const node = this.nodes.find(n => {
-                if (n.x == null || n.y == null) return false;
-                const dx = x - n.x;
-                const dy = y - n.y;
-                return dx * dx + dy * dy < (60 * 60);
-            });
-
-            return node;
+            const point = this.transformPointToSimulation(d3.pointer(event, this.canvas));
+            
+            // Find node under cursor
+            return this.findNodeAtPoint(point.x, point.y);
         };
-
+        
         const drag = d3.drag()
             .container(this.canvas)
             .filter(event => !event.button && !event.ctrlKey)
             .subject(dragSubject)
-            .on('start', (event) => {
-                if (!event.subject) return;
-                
-                draggedNode = event.subject;
-                this.dragging = true;
-
-                // Stop simulation and fix node
-                this.simulation.stop();
-                draggedNode.fx = draggedNode.x;
-                draggedNode.fy = draggedNode.y;
-            })
-            .on('drag', (event) => {
-                if (!draggedNode) return;
-
-                // Transform cursor position to simulation space
-                const point = d3.pointer(event, this.canvas);
-                const x = (point[0] - this.transform.x) / this.transform.k;
-                const y = (point[1] - this.transform.y) / this.transform.k;
-
-                // Update node position directly to cursor
-                draggedNode.x = x;
-                draggedNode.y = y;
-                draggedNode.fx = x;
-                draggedNode.fy = y;
-
-                this.draw();
-            })
-            .on('end', (event) => {
-                if (!draggedNode) return;
-                
-                this.dragging = false;
-
-                // Release node
-                draggedNode.fx = null;
-                draggedNode.fy = null;
-                
-                draggedNode = null;
-
-                // Restart simulation gently
-                this.simulation.alpha(0.1).restart();
-            });
-
+            .on('start', this.handleDragStart.bind(this))
+            .on('drag', this.handleDrag.bind(this))
+            .on('end', this.handleDragEnd.bind(this));
+        
         d3.select(this.canvas).call(drag);
+    }
+
+    transformPointToSimulation(point) {
+        return {
+            x: (point[0] - this.transform.x) / this.transform.k,
+            y: (point[1] - this.transform.y) / this.transform.k
+        };
+    }
+
+    findNodeAtPoint(x, y) {
+        return this.nodes.find(n => {
+            if (n.x == null || n.y == null) return false;
+            const dx = x - n.x;
+            const dy = y - n.y;
+            return dx * dx + dy * dy < (this.config.nodeRadius * this.config.nodeRadius);
+        });
+    }
+
+    handleDragStart(event) {
+        if (!event.subject) return;
+        
+        this.draggedNode = event.subject;
+        this.dragging = true;
+        
+        // Fix node position
+        this.draggedNode.fx = this.draggedNode.x;
+        this.draggedNode.fy = this.draggedNode.y;
+        
+        // Pause simulation during drag
+        this.simulation.stop();
+    }
+
+    handleDrag(event) {
+        if (!this.draggedNode) return;
+        
+        // Get mouse position in simulation space
+        const point = this.transformPointToSimulation(d3.pointer(event, this.canvas));
+        
+        // Update node position
+        this.draggedNode.x = point.x;
+        this.draggedNode.y = point.y;
+        this.draggedNode.fx = point.x;
+        this.draggedNode.fy = point.y;
+        
+        this.draw();
+    }
+
+    handleDragEnd() {
+        if (!this.draggedNode) return;
+        
+        this.dragging = false;
+        
+        // Release node
+        this.draggedNode.fx = null;
+        this.draggedNode.fy = null;
+        
+        this.draggedNode = null;
+        
+        // Restart simulation
+        this.simulation.alpha(0.1).restart();
     }
 
     expandCluster(node) {
@@ -416,12 +488,8 @@ class EdgeGraph {
         this.simulation.alpha(1).restart();
     }
 
-    getBidirectionalPair(currentLink) {
-        return this.links.find(link => 
-            link !== currentLink && 
-            link.source.id === currentLink.target.id && 
-            link.target.id === currentLink.source.id
-        );
+    getBidirectionalPair(link) {
+        return this.bidirectionalPairs.get(link);
     }
 
     // Add this helper function to the class to wrap text
@@ -468,7 +536,7 @@ class EdgeGraph {
         
         this.nodes.forEach(node => {
             if (node.x == null || node.y == null) return;
-            const radius = 60; // Node radius
+            const radius = this.config.nodeRadius; // Node radius
             minX = Math.min(minX, node.x - radius);
             maxX = Math.max(maxX, node.x + radius);
             minY = Math.min(minY, node.y - radius);
@@ -476,8 +544,8 @@ class EdgeGraph {
         });
 
         // Add consistent padding
-        const edgePadding = 40;
-        const viewPadding = 60;
+        const edgePadding = this.config.edgePadding;
+        const viewPadding = this.config.viewPadding;
         
         // Adjust bounds with padding
         minX -= edgePadding;
@@ -512,5 +580,20 @@ class EdgeGraph {
 
         this.transform = transform;
         this.draw();
+    }
+
+    isNodeVisible(node) {
+        const visibleMinX = -this.transform.x / this.transform.k;
+        const visibleMinY = -this.transform.y / this.transform.k;
+        const visibleMaxX = (this.canvas.width - this.transform.x) / this.transform.k;
+        const visibleMaxY = (this.canvas.height - this.transform.y) / this.transform.k;
+        
+        const r = this.config.nodeRadius;
+        return (
+            node.x + r > visibleMinX &&
+            node.x - r < visibleMaxX &&
+            node.y + r > visibleMinY &&
+            node.y - r < visibleMaxY
+        );
     }
 }

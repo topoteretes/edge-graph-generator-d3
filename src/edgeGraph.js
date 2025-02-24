@@ -27,12 +27,12 @@ class EdgeGraph {
         this.simulation = d3.forceSimulation(this.nodes)
             .force('link', d3.forceLink(this.links)
                 .id(d => d.id)
-                .distance(200))  // Increased from 150 to 200 for more space
+                .distance(250))  // Increased from 200 to 250
             .force('charge', d3.forceManyBody()
-                .strength(-500)
-                .distanceMax(300))
+                .strength(-600)  // Increased repulsion
+                .distanceMax(350))
             .force('collide', d3.forceCollide()
-                .radius(50)
+                .radius(65)     // Slightly larger than node radius
                 .strength(0.7))
             .force('center', d3.forceCenter(
                 this.canvas.width / 2,
@@ -90,7 +90,7 @@ class EdgeGraph {
             if (sourceNode && targetNode && sourceNode.x != null && sourceNode.y != null && 
                 targetNode.x != null && targetNode.y != null) {
                 
-                const nodeRadius = 45;  // Match the new node size
+                const nodeRadius = 60;  // Match the new node size
                 // Calculate direction vector
                 const dx = targetNode.x - sourceNode.x;
                 const dy = targetNode.y - sourceNode.y;
@@ -217,7 +217,7 @@ class EdgeGraph {
         this.nodes.forEach(node => {
             if (node.x == null || node.y == null) return;
             
-            const nodeRadius = 45;  // Increased node size
+            const nodeRadius = 60;  // Increased node size
             
             // Draw node circle without border
             this.ctx.beginPath();

@@ -273,20 +273,23 @@ class EdgeGraph {
 
     setupDrag() {
         let draggedNode = null;
-        let dragStartPosition = null;
+        let dragOffset = { x: 0, y: 0 };
 
         const dragSubject = (event) => {
-            // Get mouse position in canvas coordinates
             const point = d3.pointer(event, this.canvas);
-            // Transform to simulation coordinates
             const x = (point[0] - this.transform.x) / this.transform.k;
             const y = (point[1] - this.transform.y) / this.transform.k;
 
-            // Find the closest node
             const node = this.nodes.find(n => {
-                const dx = x - (n.x || 0);
-                const dy = y - (n.y || 0);
-                return dx * dx + dy * dy < 400; // Increased hit area
+                if (n.x == null || n.y == null) return false;
+                const dx = x - n.x;
+                const dy = y - n.y;
+                if (dx * dx + dy * dy < (60 * 60)) {
+                    dragOffset.x = dx;
+                    dragOffset.y = dy;
+                    return true;
+                }
+                return false;
             });
 
             return node;
@@ -294,55 +297,49 @@ class EdgeGraph {
 
         const drag = d3.drag()
             .container(this.canvas)
+            .filter(event => {
+                return !event.button && !event.ctrlKey;
+            })
             .subject(dragSubject)
             .on('start', (event) => {
                 if (!event.subject) return;
                 
+                this.dragging = true;
                 draggedNode = event.subject;
-                dragStartPosition = d3.pointer(event, this.canvas);
                 
-                // Stop any ongoing simulation
-                this.simulation.alphaTarget(0.3).restart();
-                
-                // Fix the node in place during drag
+                // Keep simulation running but fix dragged node
                 draggedNode.fx = draggedNode.x;
                 draggedNode.fy = draggedNode.y;
+                
+                // Ensure simulation is active
+                this.simulation.alphaTarget(0.3).restart();
             })
             .on('drag', (event) => {
                 if (!draggedNode) return;
                 
-                // Update node position
-                draggedNode.fx = (event.x - this.transform.x) / this.transform.k;
-                draggedNode.fy = (event.y - this.transform.y) / this.transform.k;
+                // Update dragged node position directly from mouse
+                const x = (event.x - this.transform.x) / this.transform.k;
+                const y = (event.y - this.transform.y) / this.transform.k;
+                draggedNode.fx = x - dragOffset.x;
+                draggedNode.fy = y - dragOffset.y;
                 
-                // Keep simulation running
-                this.simulation.alpha(0.3).restart();
+                // Let simulation continue for other nodes
+                this.simulation.alpha(0.3);
             })
             .on('end', (event) => {
-                if (!draggedNode || !dragStartPosition) return;
+                if (!draggedNode) return;
 
-                // Check if this was a click (not a drag)
-                const endPoint = d3.pointer(event, this.canvas);
-                const dx = endPoint[0] - dragStartPosition[0];
-                const dy = endPoint[1] - dragStartPosition[1];
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 5) {
-                    console.log('Click detected on node:', draggedNode);
-                    if (draggedNode.collapsed) {
-                        this.expandCluster(draggedNode);
-                    } else if (draggedNode.children && draggedNode.children.length > 0) {
-                        this.collapseCluster(draggedNode);
-                    }
-                }
-
-                // Release the node
+                this.dragging = false;
+                
+                // Release the dragged node
                 draggedNode.fx = null;
                 draggedNode.fy = null;
                 
-                this.simulation.alphaTarget(0);
                 draggedNode = null;
-                dragStartPosition = null;
+                dragOffset = { x: 0, y: 0 };
+                
+                // Let simulation cool down naturally
+                this.simulation.alphaTarget(0);
             });
 
         d3.select(this.canvas).call(drag);
@@ -454,6 +451,10 @@ class EdgeGraph {
     setupZoom() {
         const zoom = d3.zoom()
             .scaleExtent([this.minZoom, this.maxZoom])
+            .filter(event => {
+                // Allow zoom only when not dragging and using wheel/pinch
+                return !this.dragging && (event.type === 'wheel' || event.type === 'touchmove');
+            })
             .on('zoom', (event) => {
                 this.transform = event.transform;
                 this.draw();

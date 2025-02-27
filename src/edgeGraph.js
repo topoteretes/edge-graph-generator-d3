@@ -68,8 +68,9 @@ class EdgeGraph {
                 .strength(-600)
                 .distanceMax(350))
             .force('collide', d3.forceCollide()
-                .radius(65)
-                .strength(0.7))
+                .radius(this.config.nodeRadius * 1.05)
+                .strength(0.7)
+                .iterations(2))
             .force('center', d3.forceCenter(
                 this.canvas.width / 2,
                 this.canvas.height / 2)
@@ -375,12 +376,18 @@ class EdgeGraph {
         this.draggedNode = event.subject;
         this.dragging = true;
         
+        // Save original collision strength and increase during drag
+        this.originalCollideStrength = this.simulation.force('collide').strength();
+        this.simulation.force('collide')
+            .radius(this.config.nodeRadius * 1.1) // Slightly larger collision radius
+            .strength(1); // Maximum strength
+        
         // Fix node position
         this.draggedNode.fx = this.draggedNode.x;
         this.draggedNode.fy = this.draggedNode.y;
         
-        // Pause simulation during drag
-        this.simulation.stop();
+        // Don't completely stop the simulation, just reduce alpha
+        this.simulation.alphaTarget(0.1).restart();
     }
 
     handleDrag(event) {
@@ -395,6 +402,9 @@ class EdgeGraph {
         this.draggedNode.fx = point.x;
         this.draggedNode.fy = point.y;
         
+        // Apply collision avoidance - push other nodes away
+        this.applyCollisionAvoidance();
+        
         this.draw();
     }
 
@@ -407,10 +417,15 @@ class EdgeGraph {
         this.draggedNode.fx = null;
         this.draggedNode.fy = null;
         
+        // Restore original collision settings
+        this.simulation.force('collide')
+            .radius(this.config.nodeRadius * 1.05)
+            .strength(this.originalCollideStrength || 0.7);
+        
         this.draggedNode = null;
         
         // Restart simulation
-        this.simulation.alpha(0.1).restart();
+        this.simulation.alphaTarget(0).alpha(0.3).restart();
     }
 
     expandCluster(node) {
@@ -595,5 +610,57 @@ class EdgeGraph {
             node.y + r > visibleMinY &&
             node.y - r < visibleMaxY
         );
+    }
+
+    // Add this new method to handle collision avoidance
+    applyCollisionAvoidance() {
+        const draggedNode = this.draggedNode;
+        const nodeRadius = this.config.nodeRadius;
+        const minDistance = nodeRadius * 2; // Minimum distance between node centers
+        const repulsionStrength = 0.2; // Strength of the repulsion (0.1 to 0.3 works well)
+        
+        // For each node, check if it's too close to the dragged node
+        this.nodes.forEach(node => {
+            if (node === draggedNode) return; // Skip the dragged node
+            
+            // Calculate distance between nodes
+            const dx = node.x - draggedNode.x;
+            const dy = node.y - draggedNode.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // If nodes are too close
+            if (distance < minDistance) {
+                // Calculate the overlap amount
+                const overlap = minDistance - distance;
+                
+                // Calculate normalized direction vector
+                let dirX = dx, dirY = dy;
+                if (distance > 0) {
+                    dirX = dx / distance;
+                    dirY = dy / distance;
+                } else {
+                    // If nodes are exactly at the same position, move in a random direction
+                    const angle = Math.random() * 2 * Math.PI;
+                    dirX = Math.cos(angle);
+                    dirY = Math.sin(angle);
+                }
+                
+                // Push the other node away along the direction vector
+                // The repulsion strength determines how quickly nodes move away
+                node.x += dirX * overlap * repulsionStrength;
+                node.y += dirY * overlap * repulsionStrength;
+                
+                // Ensure other nodes remain within bounds and have consistent physics
+                // Even after we push them away
+                if (node.fx === null && node.fy === null) {
+                    // Only apply velocity if the node isn't fixed
+                    const velocityDamping = 0.5; // Dampen velocity for smoother movement
+                    if (!node.vx) node.vx = 0;
+                    if (!node.vy) node.vy = 0;
+                    node.vx += dirX * overlap * repulsionStrength * velocityDamping;
+                    node.vy += dirY * overlap * repulsionStrength * velocityDamping;
+                }
+            }
+        });
     }
 }

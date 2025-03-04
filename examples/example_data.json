@@ -1,137 +1,1330 @@
 {
-    "nodes": [{
+  "nodes": [
+    {
       "id": 1,
-      "label": "Joseph Gordon-Levitt",
+      "label": "Tom Hanks",
       "properties": {
-        "name": "Joseph Gordon-Levitt",
-        "description": "This is Joseph Gordon-Levitt",
+        "name": "Tom Hanks",
+        "born": "1956",
         "type": "Actor"
       }
-    }, {
+    },
+    {
       "id": 2,
       "label": "Leonardo DiCaprio",
       "properties": {
         "name": "Leonardo DiCaprio",
-        "description": "This is Leonardo DiCaprio",
+        "born": "1974",
         "type": "Actor"
       }
-    }, {
+    },
+    {
       "id": 3,
+      "label": "Steven Spielberg",
+      "properties": {
+        "name": "Steven Spielberg",
+        "born": "1946",
+        "type": "Director"
+      }
+    },
+    {
+      "id": 4,
       "label": "Christopher Nolan",
       "properties": {
         "name": "Christopher Nolan",
-        "description": "This is Christopher Nolan",
+        "born": "1970",
         "type": "Director"
       }
-    }, {
-      "id": 4,
+    },
+    {
+      "id": 5,
+      "label": "Saving Private Ryan",
+      "properties": {
+        "title": "Saving Private Ryan",
+        "year": "1998",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 6,
+      "label": "Forrest Gump",
+      "properties": {
+        "title": "Forrest Gump",
+        "year": "1994",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 7,
       "label": "Inception",
       "properties": {
         "title": "Inception",
-        "description": "This is Inception",
+        "year": "2010",
         "type": "Film"
       }
-    }, {
-      "id": 5,
-      "label": "From Dusk Till Dawn",
+    },
+    {
+      "id": 8,
+      "label": "The Revenant",
       "properties": {
-        "title": "From Dusk Till Dawn",
-        "description": "This is From Dusk Till Dawn",
+        "title": "The Revenant",
+        "year": "2015",
         "type": "Film"
       }
-    }, {
-      "id": 6,
-      "label": "Quentin Tarantino",
+    },
+    {
+      "id": 9,
+      "label": "Meryl Streep",
       "properties": {
-        "title": "Quentin Tarantino",
-        "description": "This is Quentin Tarantino",
+        "name": "Meryl Streep",
+        "born": "1949",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 10,
+      "label": "The Devil Wears Prada",
+      "properties": {
+        "title": "The Devil Wears Prada",
+        "year": "2006",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 11,
+      "label": "Anne Hathaway",
+      "properties": {
+        "name": "Anne Hathaway",
+        "born": "1982",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 12,
+      "label": "The Dark Knight Rises",
+      "properties": {
+        "title": "The Dark Knight Rises",
+        "year": "2012",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 13,
+      "label": "Interstellar",
+      "properties": {
+        "title": "Interstellar",
+        "year": "2014",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 14,
+      "label": "Matthew McConaughey",
+      "properties": {
+        "name": "Matthew McConaughey",
+        "born": "1969",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 15,
+      "label": "Christian Bale",
+      "properties": {
+        "name": "Christian Bale",
+        "born": "1974",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 16,
+      "label": "The Dark Knight",
+      "properties": {
+        "title": "The Dark Knight",
+        "year": "2008",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 17,
+      "label": "Heath Ledger",
+      "properties": {
+        "name": "Heath Ledger",
+        "born": "1979",
+        "died": "2008",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 18,
+      "label": "Joseph Gordon-Levitt",
+      "properties": {
+        "name": "Joseph Gordon-Levitt",
+        "born": "1981",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 19,
+      "label": "Warner Bros",
+      "properties": {
+        "name": "Warner Bros",
+        "founded": "1923",
+        "type": "Studio"
+      }
+    },
+    {
+      "id": 20,
+      "label": "Paramount",
+      "properties": {
+        "name": "Paramount",
+        "founded": "1912",
+        "type": "Studio"
+      }
+    },
+    {
+      "id": 21,
+      "label": "Universal",
+      "properties": {
+        "name": "Universal",
+        "founded": "1912",
+        "type": "Studio"
+      }
+    },
+    {
+      "id": 22,
+      "label": "The Wolf of Wall Street",
+      "properties": {
+        "title": "The Wolf of Wall Street",
+        "year": "2013",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 23,
+      "label": "Martin Scorsese",
+      "properties": {
+        "name": "Martin Scorsese",
+        "born": "1942",
         "type": "Director"
       }
-    }, {
-      "id": 7,
-      "label": "Danny Trejo",
+    },
+    {
+      "id": 24,
+      "label": "Goodfellas",
       "properties": {
-        "title": "Danny Trejo",
-        "description": "This is Danny Trejo",
+        "title": "Goodfellas",
+        "year": "1990",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 25,
+      "label": "Robert De Niro",
+      "properties": {
+        "name": "Robert De Niro",
+        "born": "1943",
         "type": "Actor"
       }
-    }, {
-      "id": 8,
-      "label": "Selma Hayek",
+    },
+    {
+      "id": 26,
+      "label": "Catch Me If You Can",
       "properties": {
-        "title": "Selma Hayek",
-        "description": "This is Selma Hayek",
-        "type": "Actor"
+        "title": "Catch Me If You Can",
+        "year": "2002",
+        "type": "Film"
       }
-    }, {
-      "id": 9,
+    },
+    {
+      "id": 27,
+      "label": "Dunkirk",
+      "properties": {
+        "title": "Dunkirk",
+        "year": "2017",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 28,
       "label": "Titanic",
       "properties": {
         "title": "Titanic",
-        "description": "This is Titanic",
+        "year": "1997",
         "type": "Film"
       }
-    }],
-    "edges": [{
+    },
+    {
+      "id": 29,
+      "label": "James Cameron",
+      "properties": {
+        "name": "James Cameron",
+        "born": "1954",
+        "type": "Director"
+      }
+    },
+    {
+      "id": 30,
+      "label": "Kate Winslet",
+      "properties": {
+        "name": "Kate Winslet",
+        "born": "1975",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 31,
+      "label": "Academy Award",
+      "properties": {
+        "name": "Academy Award",
+        "type": "Award"
+      }
+    },
+    {
+      "id": 32,
+      "label": "Golden Globe",
+      "properties": {
+        "name": "Golden Globe",
+        "type": "Award"
+      }
+    },
+    {
+      "id": 33,
+      "label": "Drama",
+      "properties": {
+        "name": "Drama",
+        "type": "Genre"
+      }
+    },
+    {
+      "id": 34,
+      "label": "Sci-Fi",
+      "properties": {
+        "name": "Sci-Fi",
+        "type": "Genre"
+      }
+    },
+    {
+      "id": 35,
+      "label": "Action",
+      "properties": {
+        "name": "Action",
+        "type": "Genre"
+      }
+    },
+    {
+      "id": 36,
+      "label": "Comedy",
+      "properties": {
+        "name": "Comedy",
+        "type": "Genre"
+      }
+    },
+    {
+      "id": 37,
+      "label": "Crime",
+      "properties": {
+        "name": "Crime",
+        "type": "Genre"
+      }
+    },
+    {
+      "id": 38,
+      "label": "Avatar",
+      "properties": {
+        "title": "Avatar",
+        "year": "2009",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 39,
+      "label": "Sam Worthington",
+      "properties": {
+        "name": "Sam Worthington",
+        "born": "1976",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 40,
+      "label": "The Terminal",
+      "properties": {
+        "title": "The Terminal",
+        "year": "2004",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 41,
+      "label": "Quentin Tarantino",
+      "properties": {
+        "name": "Quentin Tarantino",
+        "born": "1963",
+        "type": "Director"
+      }
+    },
+    {
+      "id": 42,
+      "label": "Pulp Fiction",
+      "properties": {
+        "title": "Pulp Fiction",
+        "year": "1994",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 43,
+      "label": "Samuel L. Jackson",
+      "properties": {
+        "name": "Samuel L. Jackson",
+        "born": "1948",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 44,
+      "label": "Uma Thurman",
+      "properties": {
+        "name": "Uma Thurman",
+        "born": "1970",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 45,
+      "label": "John Travolta",
+      "properties": {
+        "name": "John Travolta",
+        "born": "1954",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 46,
+      "label": "Django Unchained",
+      "properties": {
+        "title": "Django Unchained",
+        "year": "2012",
+        "type": "Film"
+      }
+    },
+    {
+      "id": 47,
+      "label": "Jamie Foxx",
+      "properties": {
+        "name": "Jamie Foxx",
+        "born": "1967",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 48,
+      "label": "Christoph Waltz",
+      "properties": {
+        "name": "Christoph Waltz",
+        "born": "1956",
+        "type": "Actor"
+      }
+    },
+    {
+      "id": 49,
+      "label": "20th Century Fox",
+      "properties": {
+        "name": "20th Century Fox",
+        "founded": "1935",
+        "type": "Studio"
+      }
+    },
+    {
+      "id": 50,
+      "label": "Disney",
+      "properties": {
+        "name": "Disney",
+        "founded": "1923",
+        "type": "Studio"
+      }
+    }
+  ],
+  "edges": [
+    {
       "source_node_id": 1,
-      "target_node_id": 4,
+      "target_node_id": 5,
       "relationship_name": "ACTED_IN",
       "properties": {
-        "role": "Arthur"
+        "role": "Captain Miller"
       }
-    }, {
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 6,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Forrest Gump"
+      }
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 40,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Viktor Navorski"
+      }
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 26,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Carl Hanratty"
+      }
+    },
+    {
       "source_node_id": 2,
-      "target_node_id": 4,
+      "target_node_id": 7,
       "relationship_name": "ACTED_IN",
       "properties": {
         "role": "Cobb"
       }
-    }, {
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 8,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Hugh Glass"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 22,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Jordan Belfort"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 26,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Frank Abagnale Jr."
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 28,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Jack Dawson"
+      }
+    },
+    {
+      "source_node_id": 3,
+      "target_node_id": 5,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "1998"
+      }
+    },
+    {
+      "source_node_id": 3,
+      "target_node_id": 26,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2002"
+      }
+    },
+    {
+      "source_node_id": 3,
+      "target_node_id": 40,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2004"
+      }
+    },
+    {
       "source_node_id": 4,
-      "target_node_id": 3,
-      "relationship_name": "DIRECTED_BY",
+      "target_node_id": 7,
+      "relationship_name": "DIRECTED",
       "properties": {
         "year": "2010"
       }
-    }, {
-      "source_node_id": 6,
-      "target_node_id": 5,
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 12,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2012"
+      }
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 13,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2014"
+      }
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 16,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2008"
+      }
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 27,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2017"
+      }
+    },
+    {
+      "source_node_id": 9,
+      "target_node_id": 10,
       "relationship_name": "ACTED_IN",
       "properties": {
-        "role": "Richard Gecko"
+        "role": "Miranda Priestly"
       }
-    }, {
-      "source_node_id": 7,
-      "target_node_id": 5,
+    },
+    {
+      "source_node_id": 11,
+      "target_node_id": 10,
       "relationship_name": "ACTED_IN",
       "properties": {
-        "role": "Razor Charlie"
+        "role": "Andy Sachs"
       }
-    }, {
-      "source_node_id": 8,
-      "target_node_id": 5,
+    },
+    {
+      "source_node_id": 11,
+      "target_node_id": 12,
       "relationship_name": "ACTED_IN",
       "properties": {
-        "role": "Santanico Pandemonium"
+        "role": "Selina Kyle"
       }
-    }, {
-      "source_node_id": 5,
+    },
+    {
+      "source_node_id": 11,
+      "target_node_id": 13,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Amelia Brand"
+      }
+    },
+    {
+      "source_node_id": 14,
+      "target_node_id": 13,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Cooper"
+      }
+    },
+    {
+      "source_node_id": 15,
+      "target_node_id": 12,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Bruce Wayne"
+      }
+    },
+    {
+      "source_node_id": 15,
+      "target_node_id": 16,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Bruce Wayne"
+      }
+    },
+    {
+      "source_node_id": 17,
+      "target_node_id": 16,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Joker"
+      }
+    },
+    {
+      "source_node_id": 18,
+      "target_node_id": 7,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Arthur"
+      }
+    },
+    {
+      "source_node_id": 18,
+      "target_node_id": 12,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "John Blake"
+      }
+    },
+    {
+      "source_node_id": 19,
+      "target_node_id": 7,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$160 million"
+      }
+    },
+    {
+      "source_node_id": 19,
+      "target_node_id": 12,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$250 million"
+      }
+    },
+    {
+      "source_node_id": 19,
+      "target_node_id": 13,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$165 million"
+      }
+    },
+    {
+      "source_node_id": 19,
+      "target_node_id": 16,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$185 million"
+      }
+    },
+    {
+      "source_node_id": 19,
+      "target_node_id": 27,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$100 million"
+      }
+    },
+    {
+      "source_node_id": 20,
+      "target_node_id": 13,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "co-production": "true"
+      }
+    },
+    {
+      "source_node_id": 20,
+      "target_node_id": 28,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$200 million"
+      }
+    },
+    {
+      "source_node_id": 20,
       "target_node_id": 6,
-      "relationship_name": "DIRECTED_BY",
+      "relationship_name": "PRODUCED",
       "properties": {
-        "year": "1996"
+        "budget": "$55 million"
       }
-    }, {
-      "source_node_id": 2,
-      "target_node_id": 9,
+    },
+    {
+      "source_node_id": 20,
+      "target_node_id": 22,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$100 million"
+      }
+    },
+    {
+      "source_node_id": 21,
+      "target_node_id": 26,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$52 million"
+      }
+    },
+    {
+      "source_node_id": 21,
+      "target_node_id": 40,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$75 million"
+      }
+    },
+    {
+      "source_node_id": 21,
+      "target_node_id": 5,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$70 million"
+      }
+    },
+    {
+      "source_node_id": 23,
+      "target_node_id": 22,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2013"
+      }
+    },
+    {
+      "source_node_id": 23,
+      "target_node_id": 24,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "1990"
+      }
+    },
+    {
+      "source_node_id": 25,
+      "target_node_id": 24,
       "relationship_name": "ACTED_IN",
       "properties": {
-        "role": "Jack"
+        "role": "Jimmy Conway"
       }
-    }],
-    "colors": {
-      "Actor": "#ff0000",
-      "Director": "#00ff00",
-      "Film": "#0000ff"
+    },
+    {
+      "source_node_id": 29,
+      "target_node_id": 28,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "1997"
+      }
+    },
+    {
+      "source_node_id": 29,
+      "target_node_id": 38,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2009"
+      }
+    },
+    {
+      "source_node_id": 30,
+      "target_node_id": 28,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Rose DeWitt Bukater"
+      }
+    },
+    {
+      "source_node_id": 39,
+      "target_node_id": 38,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Jake Sully"
+      }
+    },
+    {
+      "source_node_id": 41,
+      "target_node_id": 42,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "1994"
+      }
+    },
+    {
+      "source_node_id": 41,
+      "target_node_id": 46,
+      "relationship_name": "DIRECTED",
+      "properties": {
+        "year": "2012"
+      }
+    },
+    {
+      "source_node_id": 43,
+      "target_node_id": 42,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Jules Winnfield"
+      }
+    },
+    {
+      "source_node_id": 44,
+      "target_node_id": 42,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Mia Wallace"
+      }
+    },
+    {
+      "source_node_id": 45,
+      "target_node_id": 42,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Vincent Vega"
+      }
+    },
+    {
+      "source_node_id": 47,
+      "target_node_id": 46,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Django"
+      }
+    },
+    {
+      "source_node_id": 48,
+      "target_node_id": 46,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Dr. King Schultz"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 46,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Calvin Candie"
+      }
+    },
+    {
+      "source_node_id": 43,
+      "target_node_id": 46,
+      "relationship_name": "ACTED_IN",
+      "properties": {
+        "role": "Stephen"
+      }
+    },
+    {
+      "source_node_id": 49,
+      "target_node_id": 28,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "co-production": "true"
+      }
+    },
+    {
+      "source_node_id": 49,
+      "target_node_id": 38,
+      "relationship_name": "PRODUCED",
+      "properties": {
+        "budget": "$237 million"
+      }
+    },
+    {
+      "source_node_id": 49,
+      "target_node_id": 50,
+      "relationship_name": "ACQUIRED_BY",
+      "properties": {
+        "year": "2019"
+      }
+    },
+    {
+      "source_node_id": 5,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 5,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 6,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 6,
+      "target_node_id": 36,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 7,
+      "target_node_id": 34,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 7,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 8,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 10,
+      "target_node_id": 36,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 10,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 12,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 12,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 13,
+      "target_node_id": 34,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 13,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 16,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 16,
+      "target_node_id": 37,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 22,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 22,
+      "target_node_id": 36,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 24,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 24,
+      "target_node_id": 37,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 26,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 27,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 27,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 28,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 38,
+      "target_node_id": 34,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 38,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 40,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 40,
+      "target_node_id": 36,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 42,
+      "target_node_id": 37,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 42,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 46,
+      "target_node_id": 33,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 46,
+      "target_node_id": 35,
+      "relationship_name": "BELONGS_TO",
+      "properties": {}
+    },
+    {
+      "source_node_id": 6,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1995",
+        "category": "Best Picture"
+      }
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1995",
+        "category": "Best Actor"
+      }
+    },
+    {
+      "source_node_id": 8,
+      "target_node_id": 31,
+      "relationship_name": "NOMINATED_FOR",
+      "properties": {
+        "year": "2016",
+        "category": "Best Picture"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2016",
+        "category": "Best Actor"
+      }
+    },
+    {
+      "source_node_id": 17,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2009",
+        "category": "Best Supporting Actor"
+      }
+    },
+    {
+      "source_node_id": 9,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2012",
+        "category": "Best Actress"
+      }
+    },
+    {
+      "source_node_id": 29,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1998",
+        "category": "Best Director"
+      }
+    },
+    {
+      "source_node_id": 28,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1998",
+        "category": "Best Picture"
+      }
+    },
+    {
+      "source_node_id": 42,
+      "target_node_id": 31,
+      "relationship_name": "NOMINATED_FOR",
+      "properties": {
+        "year": "1995",
+        "category": "Best Picture"
+      }
+    },
+    {
+      "source_node_id": 48,
+      "target_node_id": 31,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2013",
+        "category": "Best Supporting Actor"
+      }
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 32,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1995",
+        "category": "Best Actor"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 32,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2016",
+        "category": "Best Actor"
+      }
+    },
+    {
+      "source_node_id": 9,
+      "target_node_id": 32,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "2012",
+        "category": "Best Actress"
+      }
+    },
+    {
+      "source_node_id": 28,
+      "target_node_id": 32,
+      "relationship_name": "WON",
+      "properties": {
+        "year": "1998",
+        "category": "Best Picture"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 23,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "5"
+      }
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 15,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "3"
+      }
+    },
+    {
+      "source_node_id": 4,
+      "target_node_id": 18,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "2"
+      }
+    },
+    {
+      "source_node_id": 3,
+      "target_node_id": 1,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "5"
+      }
+    },
+    {
+      "source_node_id": 41,
+      "target_node_id": 43,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "6"
+      }
+    },
+    {
+      "source_node_id": 41,
+      "target_node_id": 44,
+      "relationship_name": "FREQUENT_COLLABORATOR",
+      "properties": {
+        "films": "3"
+      }
+    },
+    {
+      "source_node_id": 1,
+      "target_node_id": 30,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "1"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 18,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "1"
+      }
+    },
+    {
+      "source_node_id": 18,
+      "target_node_id": 2,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "1"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 48,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "2"
+      }
+    },
+    {
+      "source_node_id": 30,
+      "target_node_id": 2,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "1"
+      }
+    },
+    {
+      "source_node_id": 2,
+      "target_node_id": 30,
+      "relationship_name": "WORKED_WITH",
+      "properties": {
+        "films": "1"
+      }
     }
+  ],
+  "colors": {
+    "Actor": "#E91E63",
+    "Director": "#9C27B0",
+    "Film": "#2196F3",
+    "Studio": "#FF9800",
+    "Award": "#CDDC39",
+    "Genre": "#009688"
   }
+} 

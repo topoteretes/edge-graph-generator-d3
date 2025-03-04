@@ -59,18 +59,18 @@ class EdgeGraph {
         // Fit view to content immediately with initial positions
         this.fitViewToContent();
 
-        // Setup force simulation with adjusted parameters
+        // Setup force simulation with adjusted parameters for more spacing
         this.simulation = d3.forceSimulation(this.nodes)
             .force('link', d3.forceLink(this.links)
                 .id(d => d.id)
-                .distance(250))
+                .distance(350))  // Increased from 250 to 350
             .force('charge', d3.forceManyBody()
-                .strength(-600)
-                .distanceMax(350))
+                .strength(-1000)  // Increased from -600 to -1000
+                .distanceMax(500))  // Increased from 350 to 500
             .force('collide', d3.forceCollide()
-                .radius(this.config.nodeRadius * 1.05)
-                .strength(0.7)
-                .iterations(2))
+                .radius(this.config.nodeRadius * 1.5)  // Increased from 1.05 to 1.5
+                .strength(0.8)  // Increased from 0.7 to 0.8
+                .iterations(3))  // Increased from 2 to 3
             .force('center', d3.forceCenter(
                 this.canvas.width / 2,
                 this.canvas.height / 2)
@@ -379,8 +379,8 @@ class EdgeGraph {
         // Save original collision strength and increase during drag
         this.originalCollideStrength = this.simulation.force('collide').strength();
         this.simulation.force('collide')
-            .radius(this.config.nodeRadius * 1.1) // Slightly larger collision radius
-            .strength(1); // Maximum strength
+            .radius(this.config.nodeRadius * 1.6)  // Increased from 1.1 to 1.6
+            .strength(1);
         
         // Fix node position
         this.draggedNode.fx = this.draggedNode.x;
@@ -419,8 +419,8 @@ class EdgeGraph {
         
         // Restore original collision settings
         this.simulation.force('collide')
-            .radius(this.config.nodeRadius * 1.05)
-            .strength(this.originalCollideStrength || 0.7);
+            .radius(this.config.nodeRadius * 1.5)
+            .strength(this.originalCollideStrength || 0.8);
         
         this.draggedNode = null;
         
@@ -616,8 +616,8 @@ class EdgeGraph {
     applyCollisionAvoidance() {
         const draggedNode = this.draggedNode;
         const nodeRadius = this.config.nodeRadius;
-        const minDistance = nodeRadius * 2; // Minimum distance between node centers
-        const repulsionStrength = 0.2; // Strength of the repulsion (0.1 to 0.3 works well)
+        const minDistance = nodeRadius * 3;  // Increased from 2 to 3 times the radius
+        const repulsionStrength = 0.3;  // Increased from 0.2 to 0.3
         
         // For each node, check if it's too close to the dragged node
         this.nodes.forEach(node => {

@@ -413,9 +413,9 @@ class EdgeGraph {
         
         this.dragging = false;
         
-        // Release node
-        this.draggedNode.fx = null;
-        this.draggedNode.fy = null;
+        // Keep node fixed at its current position instead of releasing it
+        // this.draggedNode.fx = null;
+        // this.draggedNode.fy = null;
         
         // Restore original collision settings
         this.simulation.force('collide')
@@ -424,8 +424,8 @@ class EdgeGraph {
         
         this.draggedNode = null;
         
-        // Restart simulation
-        this.simulation.alphaTarget(0).alpha(0.3).restart();
+        // Restart simulation but with lower alpha - just enough to adjust other nodes
+        this.simulation.alphaTarget(0).alpha(0.1).restart();
     }
 
     expandCluster(node) {

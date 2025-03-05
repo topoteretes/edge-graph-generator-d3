@@ -395,6 +395,9 @@ class EdgeGraph {
         this.draggedNode = event.subject;
         this.dragging = true;
         
+        // Set grabbing cursor during drag
+        document.body.style.cursor = 'grabbing';
+        
         // Save original collision strength and increase during drag
         this.originalCollideStrength = this.simulation.force('collide').strength();
         this.simulation.force('collide')
@@ -432,9 +435,8 @@ class EdgeGraph {
         
         this.dragging = false;
         
-        // Keep node fixed at its current position instead of releasing it
-        // this.draggedNode.fx = null;
-        // this.draggedNode.fy = null;
+        // Reset cursor
+        document.body.style.cursor = 'default';
         
         // Restore original collision settings
         this.simulation.force('collide')
@@ -1217,6 +1219,30 @@ class EdgeGraph {
 
     // New method for node selection
     setupNodeSelection() {
+        // Add mousemove handler to update cursor
+        d3.select(this.canvas).on('mousemove', (event) => {
+            if (this.dragging) return; // Skip during active dragging
+            
+            const point = d3.pointer(event, this.canvas);
+            const simPoint = this.transformPointToSimulation(point);
+            const nodeUnderMouse = this.findNodeAtPoint(simPoint.x, simPoint.y);
+            
+            // Set appropriate cursor
+            if (nodeUnderMouse) {
+                document.body.style.cursor = 'pointer'; // Pointer when hovering over a node
+            } else {
+                document.body.style.cursor = 'default'; // Default otherwise
+            }
+        });
+        
+        // Add mouseleave handler to reset cursor
+        d3.select(this.canvas).on('mouseleave', () => {
+            if (!this.dragging) {
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // Keep the existing click handler
         d3.select(this.canvas).on('click', (event) => {
             if (this.dragging) return; // Ignore clicks during drag operations
             

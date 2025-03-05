@@ -5,27 +5,29 @@ class EdgeGraph {
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
         
-        // Configuration constants
+        // Configuration constants with increased spacing
         this.config = {
-            nodeRadius: 60,
-            arrowLength: 15,
-            arrowWidth: Math.PI / 12,
-            lineWidth: 1.5,
-            font: '14px Arial',
-            boldFont: 'bold 14px Arial',
-            lineHeight: 16,
-            bidirectionalOffset: 15,
-            textOffset: 6,
-            edgePadding: 40,
-            viewPadding: 60
+            nodeRadius: 80, // Increased from 60
+            arrowLength: 20, // Increased from 15
+            arrowWidth: Math.PI / 10, // Wider arrows
+            lineWidth: 2, // Thicker lines
+            font: '16px Arial', // Larger font
+            boldFont: 'bold 16px Arial',
+            lineHeight: 18,
+            bidirectionalOffset: 20, // Increased from 15
+            textOffset: 8,
+            edgePadding: 60, // Increased padding
+            viewPadding: 100, // More view padding
+            levelSpacing: 350, // Vertical spacing between levels
+            nodeSpacing: 250 // Minimum horizontal spacing between nodes
         };
         
         this.simulation = null;
         this.nodes = [];
         this.links = [];
         this.transform = d3.zoomIdentity;
-        this.minZoom = 0.1;
-        this.maxZoom = 4;
+        this.minZoom = 0.05; // Lower min zoom to see more of large graphs
+        this.maxZoom = 5;
         this.dragging = false;
         this.selectedNode = null;
         this.clusterThreshold = 3;
@@ -41,17 +43,8 @@ class EdgeGraph {
         // Process data
         this.processData(this.data);
 
-        // Calculate initial positions before simulation
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
-        const radius = Math.min(this.canvas.width, this.canvas.height) / 4;
-        
-        // Position nodes in a circle initially
-        this.nodes.forEach((node, i) => {
-            const angle = (i / this.nodes.length) * 2 * Math.PI;
-            node.x = centerX + radius * Math.cos(angle);
-            node.y = centerY + radius * Math.sin(angle);
-        });
+        // Position nodes intelligently by type rather than just in a circle
+        this.organizeInitialPositions();
 
         // Setup zoom behavior first
         this.setupZoom();
@@ -59,25 +52,33 @@ class EdgeGraph {
         // Fit view to content immediately with initial positions
         this.fitViewToContent();
 
-        // Setup force simulation with adjusted parameters for more spacing
+        // Setup force simulation with significantly increased spacing
         this.simulation = d3.forceSimulation(this.nodes)
             .force('link', d3.forceLink(this.links)
                 .id(d => d.id)
-                .distance(350))  // Increased from 250 to 350
+                .distance(d => {
+                    // Dynamically set link distance based on relationship
+                    return this.getLinkDistance(d);
+                }))
             .force('charge', d3.forceManyBody()
-                .strength(-1000)  // Increased from -600 to -1000
-                .distanceMax(500))  // Increased from 350 to 500
+                .strength(-2500)  // Much stronger repulsion
+                .distanceMax(1500)) // Increased range substantially
             .force('collide', d3.forceCollide()
-                .radius(this.config.nodeRadius * 1.5)  // Increased from 1.05 to 1.5
-                .strength(0.8)  // Increased from 0.7 to 0.8
-                .iterations(3))  // Increased from 2 to 3
+                .radius(this.config.nodeRadius * 2.5)  // Even larger collision radius
+                .strength(0.95)  // Near-maximum collision strength
+                .iterations(5))  // More iterations for better positioning
             .force('center', d3.forceCenter(
                 this.canvas.width / 2,
                 this.canvas.height / 2)
             )
-            .velocityDecay(0.3)
-            .alphaMin(0.001)
-            .alphaDecay(0.0228)
+            // Use hierarchy-aware clustering force
+            .force('typeCluster', this.createTypeClusterForce())
+            // Add relationship-based positioning force
+            .force('relationshipPositioning', this.createRelationshipForce())
+            // Reduce overall movement for more stability
+            .velocityDecay(0.5) // Higher dampening
+            .alphaMin(0.0005)
+            .alphaDecay(0.01) // Slower decay for better settling
             .on('tick', () => this.draw());
 
         // Setup interactions
@@ -557,56 +558,82 @@ class EdgeGraph {
     }
 
     fitViewToContent() {
-        // Calculate bounds
-        let minX = Infinity, maxX = -Infinity;
-        let minY = Infinity, maxY = -Infinity;
+        if (this.nodes.length === 0) return;
+        
+        // Calculate graph bounds with extreme padding
+        const nodeRadius = this.config.nodeRadius;
+        
+        // Find min/max positions with node radius considered
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
         
         this.nodes.forEach(node => {
             if (node.x == null || node.y == null) return;
-            const radius = this.config.nodeRadius; // Node radius
-            minX = Math.min(minX, node.x - radius);
-            maxX = Math.max(maxX, node.x + radius);
-            minY = Math.min(minY, node.y - radius);
-            maxY = Math.max(maxY, node.y + radius);
+            
+            // Use even larger multipliers for node radius
+            minX = Math.min(minX, node.x - nodeRadius * 8);
+            maxX = Math.max(maxX, node.x + nodeRadius * 8);
+            minY = Math.min(minY, node.y - nodeRadius * 8);
+            maxY = Math.max(maxY, node.y + nodeRadius * 8);
         });
-
-        // Add consistent padding
-        const edgePadding = this.config.edgePadding;
-        const viewPadding = this.config.viewPadding;
         
-        // Adjust bounds with padding
-        minX -= edgePadding;
-        maxX += edgePadding;
-        minY -= edgePadding;
-        maxY += edgePadding;
-
-        // Calculate dimensions
-        const width = this.canvas.width - (viewPadding * 2);
-        const height = this.canvas.height - (viewPadding * 2);
+        // Get canvas dimensions
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        
+        // Calculate the dimensions of the graph content
         const graphWidth = maxX - minX;
         const graphHeight = maxY - minY;
         
-        // Calculate scale to fit content with additional scaling factor
-        const scale = Math.min(
-            width / graphWidth,
-            height / graphHeight,
-            0.8  // Reduced from 0.9 to 0.8 to zoom out more
-        );
-
-        // Calculate translation to center and account for padding
-        const tx = viewPadding + (-minX * scale) + (width - graphWidth * scale) / 2;
-        const ty = viewPadding + (-minY * scale) + (height - graphHeight * scale) / 2;
-
-        // Apply transform
+        // Force a very aggressive zoom out factor - much smaller number means more zoomed out
+        let scale = 0.15;
+        
+        // Calculate the minimum scale needed to fit all content with padding
+        const fitScaleWidth = (width * 0.85) / graphWidth;
+        const fitScaleHeight = (height * 0.85) / graphHeight;
+        
+        // Use the smaller of our fixed scale or what's needed to fit content
+        scale = Math.min(scale, fitScaleWidth, fitScaleHeight);
+        
+        console.log("Graph dimensions:", graphWidth, "x", graphHeight);
+        console.log("Canvas dimensions:", width, "x", height);
+        console.log("Initial zoom scale:", scale);
+        
+        // Calculate the center of the graph content in its original coordinates
+        const graphCenterX = (minX + maxX) / 2;
+        const graphCenterY = (minY + maxY) / 2;
+        
+        // Calculate the canvas center
+        const canvasCenterX = width / 2;
+        const canvasCenterY = height / 2;
+        
+        // Calculate translation to center the graph in the canvas
+        const tx = canvasCenterX - (graphCenterX * scale);
+        const ty = canvasCenterY - (graphCenterY * scale);
+        
+        console.log("Translation:", tx, ty);
+        
+        // Apply transform with the correct centering
         const transform = d3.zoomIdentity
             .translate(tx, ty)
             .scale(scale);
-
+        
+        // Apply the zoom transform immediately and also with a delay as a fallback
         d3.select(this.canvas)
             .call(d3.zoom().transform, transform);
-
+        
         this.transform = transform;
         this.draw();
+        
+        // Apply again after a delay in case the initial attempt doesn't work
+        setTimeout(() => {
+            d3.select(this.canvas)
+                .call(d3.zoom().transform, transform);
+            
+            this.transform = transform;
+            this.draw();
+            
+            console.log("Zoom transform reapplied:", transform);
+        }, 500);
     }
 
     isNodeVisible(node) {
@@ -684,5 +711,488 @@ class EdgeGraph {
                 }
             }
         });
+    }
+
+    // New method that analyzes graph structure and arranges nodes in a hierarchical layout
+    organizeInitialPositions() {
+        // Analyze the graph to determine hierarchical relationships
+        this.computeNodeHierarchy();
+        
+        const canvas = this.canvas;
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // Group nodes by their hierarchical level and type
+        const levelGroups = {};
+        const maxLevel = Math.max(...this.nodes.map(n => n.level || 0));
+        
+        this.nodes.forEach(node => {
+            const level = node.level || 0;
+            const type = node.properties && node.properties.type ? node.properties.type : 'default';
+            
+            if (!levelGroups[level]) {
+                levelGroups[level] = {};
+            }
+            
+            if (!levelGroups[level][type]) {
+                levelGroups[level][type] = [];
+            }
+            
+            levelGroups[level][type].push(node);
+        });
+        
+        // Enhanced positioning with increased spacing
+        Object.keys(levelGroups).forEach(level => {
+            const levelNumber = parseInt(level);
+            // Use the configuration parameter for level spacing
+            const yPosition = (height * 0.1) + (levelNumber / Math.max(1, maxLevel)) * (height * 0.8);
+            const typeGroups = levelGroups[level];
+            
+            // For each type within this level
+            const typeCount = Object.keys(typeGroups).length;
+            const typeKeys = Object.keys(typeGroups);
+            
+            typeKeys.forEach((type, typeIndex) => {
+                const nodes = typeGroups[type];
+                
+                // Horizontal position with more space between type groups
+                const sectionWidth = width / (typeCount + 1);
+                const xCenter = sectionWidth * (typeIndex + 1);
+                
+                // Arrange nodes of this type in this level with more spacing
+                const nodeCount = nodes.length;
+                // Use the configuration parameter for node spacing
+                const spacing = Math.max(this.config.nodeSpacing, sectionWidth / (nodeCount + 1));
+                
+                nodes.forEach((node, i) => {
+                    let xOffset = 0;
+                    
+                    // For larger groups, use a grid layout
+                    if (nodeCount > 7) {
+                        const rowSize = Math.ceil(Math.sqrt(nodeCount * 1.5)); // Wider rows
+                        const row = Math.floor(i / rowSize);
+                        const col = i % rowSize;
+                        xOffset = (col - rowSize/2) * spacing;
+                        node.y = yPosition + row * spacing;
+                    } else {
+                        // For smaller groups, use a horizontal layout
+                        xOffset = (i - (nodeCount - 1) / 2) * spacing;
+                        node.y = yPosition;
+                    }
+                    
+                    node.x = xCenter + xOffset;
+                    
+                    // Move important nodes (ones with many connections) to the center
+                    if (node.childCount > 5 || node.parentCount > 5) {
+                        node.x = Math.max(width * 0.3, Math.min(width * 0.7, node.x));
+                    }
+                });
+            });
+        });
+        
+        // Second pass to separate nodes that might be too close
+        this.resolveOverlaps();
+    }
+
+    // New method to resolve initial node overlaps
+    resolveOverlaps() {
+        const nodeRadius = this.config.nodeRadius * 3; // Extra large minimum distance
+        const iterations = 5;
+        
+        for (let iter = 0; iter < iterations; iter++) {
+            let moved = false;
+            
+            for (let i = 0; i < this.nodes.length; i++) {
+                const nodeA = this.nodes[i];
+                
+                for (let j = i + 1; j < this.nodes.length; j++) {
+                    const nodeB = this.nodes[j];
+                    
+                    const dx = nodeB.x - nodeA.x;
+                    const dy = nodeB.y - nodeA.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < nodeRadius) {
+                        moved = true;
+                        
+                        // Calculate the overlap and direction
+                        const overlap = nodeRadius - distance;
+                        const dirX = dx / distance;
+                        const dirY = dy / distance;
+                        
+                        // Move both nodes apart (slightly more for nodes on the same level)
+                        const pushStrength = (nodeA.level === nodeB.level) ? 0.6 : 0.5;
+                        
+                        nodeA.x -= dirX * overlap * pushStrength;
+                        nodeA.y -= dirY * overlap * pushStrength;
+                        nodeB.x += dirX * overlap * pushStrength;
+                        nodeB.y += dirY * overlap * pushStrength;
+                    }
+                }
+            }
+            
+            if (!moved) break;
+        }
+    }
+
+    // New method to analyze the graph and compute hierarchical levels for each node
+    computeNodeHierarchy() {
+        // Create a map of node IDs for quick lookup
+        const nodeMap = {};
+        this.nodes.forEach(node => {
+            nodeMap[node.id] = node;
+            // Initialize hierarchical properties
+            node.level = undefined;
+            node.childCount = 0;
+            node.parentCount = 0;
+        });
+        
+        // Count incoming and outgoing connections for each node
+        this.links.forEach(link => {
+            if (link.source && link.target) {
+                // For source node, increment child count
+                const sourceNode = typeof link.source === 'object' ? link.source : nodeMap[link.source];
+                const targetNode = typeof link.target === 'object' ? link.target : nodeMap[link.target];
+                
+                if (sourceNode && targetNode) {
+                    sourceNode.childCount = (sourceNode.childCount || 0) + 1;
+                    targetNode.parentCount = (targetNode.parentCount || 0) + 1;
+                }
+            }
+        });
+        
+        // Find root nodes (nodes with no incoming connections)
+        const rootNodes = this.nodes.filter(node => (node.parentCount || 0) === 0);
+        
+        // If no clear roots, use nodes with the fewest incoming connections
+        if (rootNodes.length === 0) {
+            const minParents = Math.min(...this.nodes.map(n => n.parentCount || 0));
+            rootNodes.push(...this.nodes.filter(n => (n.parentCount || 0) === minParents));
+        }
+        
+        // Assign level 0 to root nodes
+        rootNodes.forEach(node => {
+            node.level = 0;
+        });
+        
+        // Breadth-first traversal to assign levels
+        const queue = [...rootNodes];
+        const visited = new Set(rootNodes.map(n => n.id));
+        
+        while (queue.length > 0) {
+            const currentNode = queue.shift();
+            const childNodes = [];
+            
+            // Find all children of this node
+            this.links.forEach(link => {
+                if (typeof link.source === 'object' && link.source.id === currentNode.id) {
+                    childNodes.push(typeof link.target === 'object' ? link.target : nodeMap[link.target]);
+                } else if (link.source === currentNode.id) {
+                    childNodes.push(typeof link.target === 'object' ? link.target : nodeMap[link.target]);
+                }
+            });
+            
+            // Process children
+            childNodes.forEach(childNode => {
+                if (childNode && !visited.has(childNode.id)) {
+                    childNode.level = (currentNode.level || 0) + 1;
+                    visited.add(childNode.id);
+                    queue.push(childNode);
+                }
+            });
+        }
+        
+        // Special case: handle cycles or unvisited nodes
+        this.nodes.forEach(node => {
+            if (node.level === undefined) {
+                // For nodes in cycles, assign a level based on their connections
+                const connectedNodes = [];
+                
+                this.links.forEach(link => {
+                    if (typeof link.source === 'object' && link.source.id === node.id) {
+                        const target = typeof link.target === 'object' ? link.target : nodeMap[link.target];
+                        if (target && target.level !== undefined) connectedNodes.push(target);
+                    } else if (link.source === node.id) {
+                        const target = typeof link.target === 'object' ? link.target : nodeMap[link.target];
+                        if (target && target.level !== undefined) connectedNodes.push(target);
+                    }
+                    
+                    if (typeof link.target === 'object' && link.target.id === node.id) {
+                        const source = typeof link.source === 'object' ? link.source : nodeMap[link.source];
+                        if (source && source.level !== undefined) connectedNodes.push(source);
+                    } else if (link.target === node.id) {
+                        const source = typeof link.source === 'object' ? link.source : nodeMap[link.source];
+                        if (source && source.level !== undefined) connectedNodes.push(source);
+                    }
+                });
+                
+                if (connectedNodes.length > 0) {
+                    // Assign a level one below the average of connected nodes
+                    const avgLevel = connectedNodes.reduce((sum, n) => sum + (n.level || 0), 0) / connectedNodes.length;
+                    node.level = Math.floor(avgLevel) + 1;
+                } else {
+                    // Isolated nodes go at the top
+                    node.level = 0;
+                }
+            }
+        });
+    }
+
+    // Update the custom force to respect hierarchy
+    createTypeClusterForce() {
+        // Track nodes by level and type
+        const nodesByLevelAndType = {};
+        
+        this.nodes.forEach(node => {
+            const level = node.level || 0;
+            const type = node.properties && node.properties.type ? node.properties.type : 'default';
+            
+            if (!nodesByLevelAndType[level]) {
+                nodesByLevelAndType[level] = {};
+            }
+            
+            if (!nodesByLevelAndType[level][type]) {
+                nodesByLevelAndType[level][type] = [];
+            }
+            
+            nodesByLevelAndType[level][type].push(node);
+        });
+        
+        // Create more spread-out centers for each level+type combination
+        const centers = {};
+        const canvas = this.canvas;
+        const width = canvas.width * 1.5; // Expand the effective width
+        const height = canvas.height * 1.5; // Expand the effective height
+        const maxLevel = Math.max(...this.nodes.map(n => n.level || 0));
+        
+        Object.keys(nodesByLevelAndType).forEach(level => {
+            const levelNumber = parseInt(level);
+            // More vertical space between levels
+            const yPosition = (height * 0.1) + (levelNumber / Math.max(1, maxLevel)) * (height * 0.8);
+            const typeGroups = nodesByLevelAndType[level];
+            
+            const typeCount = Object.keys(typeGroups).length;
+            // Sort types by number of nodes (largest groups in the center)
+            const sortedTypes = Object.keys(typeGroups).sort((a, b) => 
+                typeGroups[b].length - typeGroups[a].length);
+            
+            sortedTypes.forEach((type, typeIndex) => {
+                // Wider spacing between type groups
+                const sectionWidth = width / (typeCount + 1);
+                const xCenter = sectionWidth * (typeIndex + 1);
+                
+                centers[`${level}_${type}`] = {
+                    x: xCenter,
+                    y: yPosition
+                };
+            });
+        });
+        
+        // Return a custom force function with adjusted strengths
+        return function(alpha) {
+            const verticalStrength = 0.4 * alpha; // Stronger vertical constraint
+            const horizontalStrength = 0.2 * alpha; // Medium horizontal constraint
+            
+            for (const level in nodesByLevelAndType) {
+                for (const type in nodesByLevelAndType[level]) {
+                    const nodes = nodesByLevelAndType[level][type];
+                    const center = centers[`${level}_${type}`];
+                    
+                    if (center) {
+                        nodes.forEach(node => {
+                            // Skip if the node is fixed (manually positioned)
+                            if (node.fx !== null || node.fy !== null) return;
+                            
+                            // Apply different strengths for x and y
+                            node.vx = (node.vx || 0) + (center.x - node.x) * horizontalStrength;
+                            node.vy = (node.vy || 0) + (center.y - node.y) * verticalStrength;
+                        });
+                    }
+                }
+            }
+        };
+    }
+
+    // Create a force that positions nodes based on their relationships
+    createRelationshipForce() {
+        // Build a relationship map to identify common patterns
+        const relationshipMap = new Map();
+        
+        this.links.forEach(link => {
+            const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+            const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+            const relType = link.relationship_name || 'unknown';
+            
+            if (!relationshipMap.has(sourceId)) {
+                relationshipMap.set(sourceId, new Map());
+            }
+            if (!relationshipMap.has(targetId)) {
+                relationshipMap.set(targetId, new Map());
+            }
+            
+            const sourceRels = relationshipMap.get(sourceId);
+            if (!sourceRels.has(relType)) {
+                sourceRels.set(relType, new Set());
+            }
+            sourceRels.get(relType).add(targetId);
+            
+            // For bidirectional relationships
+            const targetRels = relationshipMap.get(targetId);
+            if (!targetRels.has(relType)) {
+                targetRels.set(relType, new Set());
+            }
+            targetRels.get(relType).add(sourceId);
+        });
+        
+        // Identify relationship clusters
+        const relationshipClusters = new Map();
+        let clusterIndex = 0;
+        
+        const nodeMap = {};
+        this.nodes.forEach(node => {
+            nodeMap[node.id] = node;
+        });
+        
+        // Function to determine the primary relationship type for a node
+        const getPrimaryRelationship = (nodeId) => {
+            if (!relationshipMap.has(nodeId)) return null;
+            
+            const rels = relationshipMap.get(nodeId);
+            let maxCount = 0;
+            let primaryRel = null;
+            
+            for (const [relType, targets] of rels.entries()) {
+                if (targets.size > maxCount) {
+                    maxCount = targets.size;
+                    primaryRel = relType;
+                }
+            }
+            
+            return primaryRel;
+        };
+        
+        // Create clusters based on primary relationships
+        this.nodes.forEach(node => {
+            if (relationshipClusters.has(node.id)) return;
+            
+            const primaryRel = getPrimaryRelationship(node.id);
+            if (!primaryRel) return;
+            
+            // Find related nodes with the same primary relationship
+            const cluster = new Set([node.id]);
+            const queue = [node.id];
+            
+            while (queue.length > 0) {
+                const currentId = queue.shift();
+                const currentRels = relationshipMap.get(currentId);
+                
+                if (!currentRels) continue;
+                
+                const targets = currentRels.get(primaryRel);
+                if (!targets) continue;
+                
+                targets.forEach(targetId => {
+                    if (!cluster.has(targetId) && getPrimaryRelationship(targetId) === primaryRel) {
+                        cluster.add(targetId);
+                        queue.push(targetId);
+                    }
+                });
+            }
+            
+            // Assign all nodes in this cluster
+            if (cluster.size > 1) {
+                const clusterKey = `cluster_${clusterIndex++}`;
+                cluster.forEach(id => {
+                    relationshipClusters.set(id, clusterKey);
+                });
+            }
+        });
+        
+        // Return a custom force function
+        return (alpha) => {
+            const clusterStrength = 0.2 * alpha;
+            
+            // Group nodes by relationship clusters
+            const clusterPositions = new Map();
+            
+            // Calculate average positions for each cluster
+            for (const [nodeId, clusterKey] of relationshipClusters.entries()) {
+                const node = nodeMap[nodeId];
+                if (!node || !node.x || !node.y) continue;
+                
+                if (!clusterPositions.has(clusterKey)) {
+                    clusterPositions.set(clusterKey, {
+                        x: 0, 
+                        y: 0, 
+                        count: 0
+                    });
+                }
+                
+                const pos = clusterPositions.get(clusterKey);
+                pos.x += node.x;
+                pos.y += node.y;
+                pos.count++;
+            }
+            
+            // Normalize cluster positions
+            for (const [clusterKey, pos] of clusterPositions.entries()) {
+                if (pos.count > 0) {
+                    pos.x /= pos.count;
+                    pos.y /= pos.count;
+                }
+            }
+            
+            // Apply gentle force to keep nodes in the same cluster together
+            for (const [nodeId, clusterKey] of relationshipClusters.entries()) {
+                const node = nodeMap[nodeId];
+                if (!node || node.fx !== null || node.fy !== null) continue;
+                
+                const clusterPos = clusterPositions.get(clusterKey);
+                if (!clusterPos) continue;
+                
+                // Pull toward cluster center
+                node.vx = (node.vx || 0) + (clusterPos.x - node.x) * clusterStrength;
+                node.vy = (node.vy || 0) + (clusterPos.y - node.y) * clusterStrength;
+            }
+        };
+    }
+
+    // New method to determine appropriate link distance based on relationship type
+    getLinkDistance(link) {
+        // Base distance is fairly large
+        let distance = 500;
+        
+        // If source and target have different types, make the distance larger
+        const sourceType = link.source.properties?.type;
+        const targetType = link.target.properties?.type;
+        if (sourceType && targetType && sourceType !== targetType) {
+            distance += 150;
+        }
+        
+        // If source and target are at different hierarchy levels, increase distance
+        const sourceLvl = link.source.level || 0;
+        const targetLvl = link.target.level || 0;
+        if (sourceLvl !== targetLvl) {
+            // Make vertical relationships longer
+            distance += Math.abs(sourceLvl - targetLvl) * 200;
+        }
+        
+        // Adjust distance based on relationship name if available
+        if (link.relationship_name) {
+            // These relationships often indicate primary connections
+            if (link.relationship_name === "ACTED_IN" || 
+                link.relationship_name === "DIRECTED" || 
+                link.relationship_name === "PART_OF") {
+                distance -= 100; // Shorter distance for primary relationships
+            }
+            
+            // These are often secondary relationships
+            if (link.relationship_name === "WORKED_WITH" || 
+                link.relationship_name === "FREQUENT_COLLABORATOR") {
+                distance += 150; // Longer distance for secondary relationships
+            }
+        }
+        
+        return distance;
     }
 }

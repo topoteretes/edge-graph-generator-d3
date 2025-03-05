@@ -1326,5 +1326,13 @@
     "Studio": "#FF9800",
     "Award": "#CDDC39",
     "Genre": "#009688"
+  },
+  "configuration": {
+    "logo": {
+      "url": "https://repository-images.githubusercontent.com/679343504/477b34f0-e864-4b05-b0d6-58bf8249f38c",
+      "position": "bottomRight",
+      "size": 100,
+      "padding": 20
+    }
   }
 } 

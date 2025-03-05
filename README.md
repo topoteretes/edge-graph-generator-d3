@@ -69,6 +69,14 @@ node src/generateNodeTree.js path/to/your/data.json
 Your JSON data should follow this structure:
 ```json
 {
+  "configuration": {
+    "logo": {
+      "url": "path/to/logo.png",
+      "position": "bottomRight",
+      "size": 100,
+      "padding": 20
+    }
+  },
   "nodes": [{
     "id": 1,
     "label": "Joseph Gordon-Levitt",
@@ -96,30 +104,63 @@ Your JSON data should follow this structure:
 
 ### Data Structure Explanation
 
-The JSON structure consists of three main parts:
+The JSON structure consists of four main parts:
 
-1. **Nodes**: Array of nodes with properties
+1. **Configuration**: Global settings for the visualization
+   - `logo`: Settings for displaying a logo in the graph
+
+2. **Nodes**: Array of nodes with properties
    - `id`: Unique identifier
    - `label`: Display name
    - `properties`: Additional information including type
 
-2. **Edges**: Array of relationships between nodes
+3. **Edges**: Array of relationships between nodes
    - `source_node_id`: ID of the source node
    - `target_node_id`: ID of the target node
    - `relationship_name`: Type of relationship
    - `properties`: Additional relationship information
 
-3. **Colors**: Color mapping for different node types
+4. **Colors**: Color mapping for different node types
 
-### Example Use Cases
+## Configuration Options
 
-The visualization can represent various types of relationships:
+The EdgeGraph can be customized in two ways:
 
-- Movies and actors/directors relationships
-- Family trees
-- Organization charts
-- City/country relationships
-- Any network of connected entities
+### 1. Through the JSON configuration object:
+
+```json
+"configuration": {
+  "logo": {
+    "url": "path/to/logo.png",
+    "position": "bottomRight",
+    "size": 100,
+    "padding": 20
+  }
+}
+```
+
+### 2. Through constructor options:
+
+```javascript
+// Create a new graph with custom options
+const edgeGraph = new EdgeGraph(container, data, {
+    logoUrl: 'path/to/your/logo.png',
+    logoPosition: 'bottomRight',
+    logoSize: 100,
+    logoPadding: 20
+});
+```
+
+Note: Configuration in the JSON file takes precedence over constructor options.
+
+### Logo Options
+
+You can display a custom logo in the corner of your graph:
+
+- **url/logoUrl**: Path to the logo image file
+- **position/logoPosition**: Where to position the logo (bottomRight, bottomLeft, topRight, topLeft)
+- **size/logoSize**: Maximum dimension of the logo in pixels (preserves aspect ratio)
+- **padding/logoPadding**: Padding from the edge of the canvas in pixels
 
 ## Interaction Guide
 

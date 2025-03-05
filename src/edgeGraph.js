@@ -1,9 +1,27 @@
 class EdgeGraph {
-    constructor(container, data) {
+    constructor(container, data, options = {}) {
         this.container = container;
         this.data = data;
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
+        
+        // Get configuration from data file first, then fall back to options
+        const dataConfig = data.configuration || {};
+        const logoConfig = dataConfig.logo || {};
+        
+        // Parse options (prioritize data file config over constructor options)
+        this.options = {
+            logoUrl: logoConfig.url || options.logoUrl || null,
+            logoPosition: logoConfig.position || options.logoPosition || 'bottomRight',
+            logoSize: logoConfig.size || options.logoSize || 100,
+            logoPadding: logoConfig.padding || options.logoPadding || 20,
+        };
+        
+        // Logo image element
+        this.logoImage = null;
+        if (this.options.logoUrl) {
+            this.loadLogo(this.options.logoUrl);
+        }
         
         // Configuration constants with increased spacing
         this.config = {
@@ -162,6 +180,11 @@ class EdgeGraph {
         // Draw UI elements without transformation (in screen space)
         if (this.selectedNode && this.infoBox.visible) {
             this.drawInfoBox();
+        }
+        
+        // Draw logo if available
+        if (this.logoImage && this.logoImage.complete) {
+            this.drawLogo();
         }
     }
 
@@ -1389,5 +1412,69 @@ class EdgeGraph {
         });
         
         ctx.restore();
+    }
+
+    // Add method to load the logo
+    loadLogo(url) {
+        this.logoImage = new Image();
+        this.logoImage.onload = () => {
+            this.draw(); // Redraw when logo is loaded
+        };
+        this.logoImage.onerror = (err) => {
+            console.error('Error loading logo:', err);
+            this.logoImage = null;
+        };
+        this.logoImage.src = url;
+    }
+
+    // Add method to draw the logo
+    drawLogo() {
+        const logoSize = this.options.logoSize;
+        const padding = this.options.logoPadding;
+        const position = this.options.logoPosition;
+        
+        // Calculate logo dimensions while maintaining aspect ratio
+        let width, height;
+        const logoRatio = this.logoImage.width / this.logoImage.height;
+        
+        if (logoRatio >= 1) {
+            // Wider than tall
+            width = Math.min(logoSize, this.logoImage.width);
+            height = width / logoRatio;
+        } else {
+            // Taller than wide
+            height = Math.min(logoSize, this.logoImage.height);
+            width = height * logoRatio;
+        }
+        
+        // Calculate position based on setting
+        let x, y;
+        switch (position) {
+            case 'bottomRight':
+                x = this.canvas.width - width - padding;
+                y = this.canvas.height - height - padding;
+                break;
+            case 'bottomLeft':
+                x = padding;
+                y = this.canvas.height - height - padding;
+                break;
+            case 'topRight':
+                x = this.canvas.width - width - padding;
+                y = padding;
+                break;
+            case 'topLeft':
+                x = padding;
+                y = padding;
+                break;
+            default:
+                x = this.canvas.width - width - padding;
+                y = this.canvas.height - height - padding;
+        }
+        
+        // Draw the logo with slight transparency to not distract from the graph
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.8;
+        this.ctx.drawImage(this.logoImage, x, y, width, height);
+        this.ctx.restore();
     }
 }

@@ -437,11 +437,32 @@
     },
     {
       "id": 50,
-      "label": "Disney",
+      "label": "Python",
       "properties": {
-        "name": "Disney",
-        "founded": "1923",
-        "type": "Studio"
+        "name": "Python",
+        "created": "1991",
+        "creator": "Guido van Rossum",
+        "type": "Technology"
+      }
+    },
+    {
+      "id": 51,
+      "label": "TensorFlow",
+      "properties": {
+        "name": "TensorFlow",
+        "created": "2015",
+        "organization": "Google",
+        "type": "Technology"
+      }
+    },
+    {
+      "id": 52,
+      "label": "Data Science",
+      "properties": {
+        "name": "Data Science",
+        "description": "Interdisciplinary field",
+        "popularity": "High",
+        "type": "Technology"
       }
     }
   ],
@@ -903,14 +924,6 @@
       }
     },
     {
-      "source_node_id": 49,
-      "target_node_id": 50,
-      "relationship_name": "ACQUIRED_BY",
-      "properties": {
-        "year": "2019"
-      }
-    },
-    {
       "source_node_id": 5,
       "target_node_id": 33,
       "relationship_name": "BELONGS_TO",
@@ -1317,15 +1330,40 @@
       "properties": {
         "films": "1"
       }
+    },
+    {
+      "source_node_id": 50,
+      "target_node_id": 51,
+      "relationship_name": "POWERS",
+      "properties": {
+        "since": "2015"
+      }
+    },
+    {
+      "source_node_id": 51,
+      "target_node_id": 52,
+      "relationship_name": "ENABLES",
+      "properties": {
+        "impact": "High"
+      }
+    },
+    {
+      "source_node_id": 52,
+      "target_node_id": 50,
+      "relationship_name": "USES",
+      "properties": {
+        "popularity": "Very High"
+      }
     }
   ],
   "colors": {
-    "Actor": "#E91E63",
-    "Director": "#9C27B0",
-    "Film": "#2196F3",
-    "Studio": "#FF9800",
+    "Actor": "#4285F4",
+    "Director": "#EA4335",
+    "Film": "#FBBC05",
+    "Studio": "#34A853",
     "Award": "#CDDC39",
-    "Genre": "#009688"
+    "Genre": "#009688",
+    "Technology": "#9C27B0"
   },
   "configuration": {
     "logo": {

@@ -124,11 +124,34 @@ The visualization can represent various types of relationships:
 ## Interaction Guide
 
 - **Drag nodes**: Click and drag any node to reposition it
+- **Click on a node**: Opens an information box showing all the node's properties
 - **Node colors**: Defined in the colors object for each node type
 - **Arrows**: Show relationship direction between nodes
 - **Labels**: 
   - Node labels appear inside nodes
   - Relationship names appear above arrows
+- **Click on empty space**: Closes any open node info box
+- **Click and drag on empty space**: Pans the entire graph
+- **Mouse wheel**: Zooms in and out of the graph
+
+### Node Info Box
+
+When clicking on a node (without dragging), an information box will appear showing:
+- The node's ID and label
+- All properties from the node's `properties` object
+- The node's type in the header with matching color
+
+To customize what information is displayed in this box, add the desired data to the node's `properties` object in your JSON data. **All properties defined in your JSON file under a node's `properties` object will automatically be shown as key-value pairs in the info box.** This makes it easy to display any custom data you want to be viewable when users interact with your graph.
+
+Example property display:
+```json
+"properties": {
+  "name": "Joseph Gordon-Levitt",  // Will show as "name: Joseph Gordon-Levitt"
+  "born": "1981",                  // Will show as "born: 1981"
+  "oscars": "0",                   // Will show as "oscars: 0"
+  "type": "Actor"                  // Used for coloring, but also shown in the header
+}
+```
 
 ## Technical Details
 

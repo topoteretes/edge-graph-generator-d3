@@ -659,14 +659,24 @@ class EdgeGraph {
                 
                 // Push the other node away along the direction vector
                 // The repulsion strength determines how quickly nodes move away
-                node.x += dirX * overlap * repulsionStrength;
-                node.y += dirY * overlap * repulsionStrength;
+                const isFixed = node.fx !== null && node.fy !== null;
                 
-                // Ensure other nodes remain within bounds and have consistent physics
-                // Even after we push them away
-                if (node.fx === null && node.fy === null) {
-                    // Only apply velocity if the node isn't fixed
-                    const velocityDamping = 0.5; // Dampen velocity for smoother movement
+                if (isFixed) {
+                    // For fixed nodes, temporarily shift them to avoid overlap
+                    // but preserve their fixed position for simulation
+                    node.x += dirX * overlap * repulsionStrength * 0.5;
+                    node.y += dirY * overlap * repulsionStrength * 0.5;
+                    
+                    // Update fx,fy to match the slightly adjusted position
+                    node.fx = node.x;
+                    node.fy = node.y;
+                } else {
+                    // For non-fixed nodes, apply full repulsion
+                    node.x += dirX * overlap * repulsionStrength;
+                    node.y += dirY * overlap * repulsionStrength;
+                    
+                    // Apply velocity for smoother movement
+                    const velocityDamping = 0.5;
                     if (!node.vx) node.vx = 0;
                     if (!node.vy) node.vy = 0;
                     node.vx += dirX * overlap * repulsionStrength * velocityDamping;

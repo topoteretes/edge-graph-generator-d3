@@ -31,6 +31,14 @@ class EdgeGraph {
         this.dragging = false;
         this.selectedNode = null;
         this.clusterThreshold = 3;
+        this.infoBox = {
+            visible: false,
+            x: 0,
+            y: 0,
+            width: 300,
+            height: 0,
+            padding: 15
+        };
         
         this.init();
     }
@@ -83,6 +91,9 @@ class EdgeGraph {
 
         // Setup interactions
         this.setupDrag();
+
+        // Setup click handler for node selection
+        this.setupNodeSelection();
     }
 
     resizeCanvas() {
@@ -140,13 +151,18 @@ class EdgeGraph {
 
     draw() {
         this.clearCanvas();
+        
+        // Draw graph elements with transformation
         this.ctx.save();
         this.applyTransform();
-        
         this.drawLinks();
         this.drawNodes();
-        
         this.ctx.restore();
+        
+        // Draw UI elements without transformation (in screen space)
+        if (this.selectedNode && this.infoBox.visible) {
+            this.drawInfoBox();
+        }
     }
 
     clearCanvas() {
@@ -372,6 +388,9 @@ class EdgeGraph {
 
     handleDragStart(event) {
         if (!event.subject) return;
+        
+        // Prevent info box from showing after a drag operation
+        this.infoBox.visible = false;
         
         this.draggedNode = event.subject;
         this.dragging = true;
@@ -1194,5 +1213,155 @@ class EdgeGraph {
         }
         
         return distance;
+    }
+
+    // New method for node selection
+    setupNodeSelection() {
+        d3.select(this.canvas).on('click', (event) => {
+            if (this.dragging) return; // Ignore clicks during drag operations
+            
+            const point = d3.pointer(event, this.canvas);
+            const simPoint = this.transformPointToSimulation(point);
+            const clickedNode = this.findNodeAtPoint(simPoint.x, simPoint.y);
+            
+            if (clickedNode) {
+                // If clicked on a node, select it and show info box
+                this.selectedNode = clickedNode;
+                this.infoBox.visible = true;
+                
+                // Calculate screen position of the node
+                const nodeScreenX = clickedNode.x * this.transform.k + this.transform.x;
+                const nodeScreenY = clickedNode.y * this.transform.k + this.transform.y;
+                
+                // Get canvas dimensions
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+                
+                // Position the info box - prefer right of node but ensure it stays on screen
+                const nodeRadius = this.config.nodeRadius * this.transform.k;
+                
+                // Start with position to the right and aligned with node top
+                let boxX = nodeScreenX + nodeRadius + 10; 
+                let boxY = nodeScreenY - nodeRadius;
+                
+                // Make sure box stays within horizontal bounds
+                if (boxX + this.infoBox.width > canvasWidth - 10) {
+                    // Not enough room on the right, try left side
+                    boxX = nodeScreenX - this.infoBox.width - nodeRadius - 10;
+                }
+                
+                // If still out of bounds (very large node or at edge), center horizontally
+                if (boxX < 10) {
+                    boxX = 10;
+                }
+                
+                // Make sure box stays within vertical bounds
+                if (boxY < 10) {
+                    boxY = 10;
+                }
+                
+                // Check if box would extend below canvas
+                // We need to estimate height first, assuming ~4 properties plus label
+                const estimatedHeight = this.infoBox.padding * 2 + (5 * 24) + 36; // header + ~5 lines
+                if (boxY + estimatedHeight > canvasHeight - 10) {
+                    // Position box above if it would go below canvas
+                    boxY = Math.max(10, canvasHeight - estimatedHeight - 10);
+                }
+                
+                this.infoBox.x = boxX;
+                this.infoBox.y = boxY;
+            } else {
+                // If clicked elsewhere, deselect and hide info box
+                this.selectedNode = null;
+                this.infoBox.visible = false;
+            }
+            
+            this.draw();
+        });
+    }
+
+    // New method to draw info box
+    drawInfoBox() {
+        const ctx = this.ctx;
+        const node = this.selectedNode;
+        const box = this.infoBox;
+        const padding = box.padding;
+        
+        // Get properties to display
+        const properties = node.properties || {};
+        const propertyLines = [];
+        
+        // Add node ID and label
+        propertyLines.push(`ID: ${node.id}`);
+        propertyLines.push(`Label: ${node.label || ''}`);
+        
+        // Add all properties
+        for (const key in properties) {
+            if (key !== 'type') { // Skip type as it's usually displayed as part of the node color
+                propertyLines.push(`${key}: ${properties[key]}`);
+            }
+        }
+        
+        // Add relationship info if available
+        if (node.relationship_name) {
+            propertyLines.push(`Relationship: ${node.relationship_name}`);
+        }
+        
+        // Calculate box height based on content
+        const lineHeight = 24;
+        box.height = padding * 2 + propertyLines.length * lineHeight + 36; // Add header height
+        
+        // Draw in screen coordinates - save current transformation
+        ctx.save();
+        
+        // Reset transformation to draw in screen space
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        // Draw shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
+        
+        // Draw white background with border
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(box.x, box.y, box.width, box.height, 8); // Using roundRect for rounded corners
+        ctx.fill();
+        ctx.stroke();
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Draw title bar
+        const nodeType = node.properties && node.properties.type ? node.properties.type : 'Node';
+        ctx.fillStyle = node.color || '#666666';
+        ctx.beginPath();
+        ctx.roundRect(box.x, box.y, box.width, 36, { upperLeft: 8, upperRight: 8, lowerLeft: 0, lowerRight: 0 });
+        ctx.fill();
+        
+        // Draw title text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(nodeType, box.x + padding, box.y + 18);
+        
+        // Draw property lines
+        ctx.fillStyle = '#333333';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        
+        propertyLines.forEach((line, index) => {
+            ctx.fillText(line, box.x + padding, box.y + padding + 36 + (index * lineHeight));
+        });
+        
+        ctx.restore();
     }
 }

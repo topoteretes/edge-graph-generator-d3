@@ -334,15 +334,14 @@ class EdgeGraph {
 
     setupDrag() {
         let draggedNode = null;
-        
+
         const dragSubject = (event) => {
-            // Transform mouse coordinates to simulation space
-            const point = this.transformPointToSimulation(d3.pointer(event, this.canvas));
+            const point = d3.pointer(event, this.canvas);
+            const simPoint = this.transformPointToSimulation(point);
             
-            // Find node under cursor
-            return this.findNodeAtPoint(point.x, point.y);
+            return this.findNodeAtPoint(simPoint.x, simPoint.y);
         };
-        
+
         const drag = d3.drag()
             .container(this.canvas)
             .filter(event => !event.button && !event.ctrlKey)
@@ -350,7 +349,7 @@ class EdgeGraph {
             .on('start', this.handleDragStart.bind(this))
             .on('drag', this.handleDrag.bind(this))
             .on('end', this.handleDragEnd.bind(this));
-        
+
         d3.select(this.canvas).call(drag);
     }
 
@@ -531,8 +530,21 @@ class EdgeGraph {
         const zoom = d3.zoom()
             .scaleExtent([this.minZoom, this.maxZoom])
             .filter(event => {
-                // Allow zoom only when not dragging and using wheel/pinch
-                return !this.dragging && (event.type === 'wheel' || event.type === 'touchmove');
+                // Allow zoom with wheel/pinch and panning with drag when not on a node
+                if (event.type === 'wheel' || event.type === 'touchmove') {
+                    return !this.dragging;
+                }
+                
+                // For mousedown events (start of drag), check if we're on a node
+                if (event.type === 'mousedown') {
+                    const point = this.transformPointToSimulation(d3.pointer(event, this.canvas));
+                    const nodeUnderMouse = this.findNodeAtPoint(point.x, point.y);
+                    // Allow panning only when not clicking on a node
+                    return !nodeUnderMouse;
+                }
+                
+                // Allow other events (like mousemove for panning)
+                return true;
             })
             .on('zoom', (event) => {
                 this.transform = event.transform;

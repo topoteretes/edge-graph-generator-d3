@@ -238,6 +238,10 @@ Example property display:
 4. Push to the branch: `git push origin feature/my-new-feature`
 5. Submit a pull request
 
+## Attribution
+
+Originally developed by [Bojan Dragojevic](https://github.com/Kibo007)
+
 ## License
 
 This project is licensed under the MIT License.

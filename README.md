@@ -2,6 +2,12 @@
 
 A tool to generate interactive, force-directed graph visualizations with nodes and edges using D3.js and HTML Canvas.
 
+## Live Demo
+
+Try the interactive visualization example: [https://edge-node-d3.vercel.app/](https://edge-node-d3.vercel.app/)
+
+![Example Graph Visualization](example.png)
+
 ## Features
 
 - Force-directed graph layout

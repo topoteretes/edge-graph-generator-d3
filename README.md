@@ -6,7 +6,7 @@ A tool to generate interactive, force-directed graph visualizations with nodes a
 
 Try the interactive visualization example: [https://edge-node-d3.vercel.app/](https://edge-node-d3.vercel.app/)
 
-![Example Graph Visualization](https://github.com/Kibo007/d3-edge-graph/blob/main/examples/preview.png)
+![Example Graph Visualization](https://github.com/topoteretes/edge-graph-generator-d3/blob/main/examples/example.png)
 
 ## Features
 
